@@ -381,10 +381,12 @@ export default function NSAnalyzer() {
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #151b2e; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+        .tab-scroll { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)", padding: "24px 32px", display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)", padding: "16px 12px", display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ width: 44, height: 44, background: "#1e293b", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "#fbbf24", fontFamily: "JetBrains Mono" }}>
           NS
         </div>
@@ -396,13 +398,13 @@ export default function NSAnalyzer() {
 
       {/* Tabs */}
       {trips.length > 0 && (
-        <div style={{ display: "flex", gap: 2, padding: "12px 32px 0", background: "#0f1525", borderBottom: "1px solid #1e293b" }}>
+        <div className="tab-scroll" style={{ display: "flex", gap: 2, padding: "12px 12px 0", background: "#0f1525", borderBottom: "1px solid #1e293b", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           {["overview", "routes", "compare", "trips", "upload"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               style={{
-                padding: "10px 20px",
+                padding: "10px 14px",
                 background: tab === t ? "#1e293b" : "transparent",
                 color: tab === t ? "#fbbf24" : "#94a3b8",
                 border: "none",
@@ -413,6 +415,8 @@ export default function NSAnalyzer() {
                 fontWeight: tab === t ? 700 : 500,
                 textTransform: "capitalize",
                 transition: "all 0.15s",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {t === "compare" ? "Subscriptions" : t}
@@ -421,7 +425,7 @@ export default function NSAnalyzer() {
         </div>
       )}
 
-      <div style={{ padding: "24px 32px", maxWidth: 1100, margin: "0 auto" }}>
+      <div style={{ padding: "16px 12px", maxWidth: 1100, margin: "0 auto" }}>
         {/* Upload Tab */}
         {(tab === "upload" || trips.length === 0) && (
           <div>
@@ -566,7 +570,7 @@ export default function NSAnalyzer() {
             })()}
 
             {/* KPI cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
               {[
                 { label: "Total trips", value: analysis.totalTrips, sub: `over ${months} month${months > 1 ? "s" : ""}` },
                 { label: "Total spent", value: fmt(analysis.totalSpent), sub: `${fmt(analysis.avgPerMonth)}/month` },
@@ -582,7 +586,7 @@ export default function NSAnalyzer() {
             </div>
 
             {/* Charts row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 24 }}>
               <div style={{ background: "#111827", borderRadius: 12, padding: "18px 20px", border: "1px solid #1e293b" }}>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Trips by day of week</div>
                 <ResponsiveContainer width="100%" height={200}>
@@ -776,8 +780,8 @@ export default function NSAnalyzer() {
               All Trips <span style={{ fontSize: 13, fontWeight: 400, color: "#64748b" }}>({classified.length})</span>
             </h2>
             <div style={{ background: "#111827", borderRadius: 12, border: "1px solid #1e293b", overflow: "hidden" }}>
-              <div style={{ maxHeight: 500, overflowY: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <div style={{ maxHeight: 500, overflowY: "auto", overflowX: "auto" }}>
+                <table style={{ width: "100%", minWidth: 550, borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: "#0f172a", position: "sticky", top: 0 }}>
                       {["Date", "From", "To", "Time", "Type", "Price"].map((h) => (
