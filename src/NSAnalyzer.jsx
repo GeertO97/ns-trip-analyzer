@@ -17,7 +17,7 @@ const SUBSCRIPTIONS = [
   {
     id: "dal-voordeel",
     name: "Dal Voordeel",
-    monthlyCost: 5.1,
+    monthlyCost: 6.35,
     peakDiscount: 0,
     offPeakDiscount: 0.4,
     weekendFree: false,
@@ -41,7 +41,7 @@ const SUBSCRIPTIONS = [
   {
     id: "weekend-vrij",
     name: "Weekend Vrij",
-    monthlyCost: 39.0,
+    monthlyCost: 39.5,
     peakDiscount: 0,
     offPeakDiscount: 0,
     weekendFree: true,
@@ -53,7 +53,7 @@ const SUBSCRIPTIONS = [
   {
     id: "dal-vrij",
     name: "Dal Vrij",
-    monthlyCost: 119.0,
+    monthlyCost: 127.95,
     peakDiscount: 0,
     offPeakDiscount: 0,
     weekendFree: false,
@@ -73,6 +73,19 @@ const SUBSCRIPTIONS = [
     allFree: true,
     color: "#fbbf24",
     description: "Unlimited travel anytime",
+  },
+  {
+    id: "traject-vrij",
+    name: "Traject Vrij",
+    monthlyCost: 0,
+    peakDiscount: 0,
+    offPeakDiscount: 0.4,
+    weekendFree: false,
+    offPeakFree: false,
+    allFree: false,
+    trajectFree: true,
+    color: "#fb923c",
+    description: "Unlimited on your route, 40% off-peak elsewhere",
   },
 ];
 
@@ -138,11 +151,20 @@ function classifyTrip(trip) {
   return { ...trip, isWeekend, isPeak, isOffPeak: !isPeak };
 }
 
-function calcSubscriptionCost(trips, sub, months) {
+function isOnRoute(trip, route) {
+  if (!route) return false;
+  const normalize = (s) => s.toLowerCase().trim();
+  const routeKey = [normalize(route.from), normalize(route.to)].sort().join("|");
+  const tripKey = [normalize(trip.from), normalize(trip.to)].sort().join("|");
+  return routeKey === tripKey;
+}
+
+function calcSubscriptionCost(trips, sub, months, trajectRoute) {
   const monthlySub = sub.monthlyCost * months;
   let tripCost = 0;
   for (const t of trips) {
     if (sub.allFree) continue;
+    if (sub.trajectFree && isOnRoute(t, trajectRoute)) continue;
     if (sub.offPeakFree && t.isOffPeak) continue;
     if (sub.weekendFree && t.isWeekend) continue;
     let price = t.price;
@@ -165,16 +187,35 @@ function parseCSV(text) {
 
   const findCol = (...names) => cols.findIndex((c) => names.some((n) => c.includes(n)));
   const dateIdx = findCol("datum", "date");
-  const checkinIdx = findCol("check-in", "vertrek", "departure", "checkin");
-  const checkoutIdx = findCol("check-uit", "checkout", "aankomst", "arrival");
+  const checkinIdx = findCol("check-in", "check in", "departure", "checkin");
+  const checkoutIdx = findCol("check-uit", "check uit", "checkout", "aankomst", "arrival");
   const fromIdx = findCol("vertrek", "from", "van", "instap");
   const toIdx = findCol("bestemming", "to", "naar", "uitstap", "destination");
-  const priceIdx = findCol("prijs", "price", "bedrag", "amount", "tarief", "fare");
-  const classIdx = findCol("klas", "class");
+  const priceIdx = findCol("prijs", "price", "bedrag", "amount", "tarief", "fare", "af");
+  const classIdx = findCol("klas", "class", "kl");
+
+  const splitCSVRow = (row, delimiter) => {
+    const vals = [];
+    let current = "";
+    let inQuotes = false;
+    for (let j = 0; j < row.length; j++) {
+      const ch = row[j];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === delimiter && !inQuotes) {
+        vals.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    vals.push(current.trim());
+    return vals;
+  };
 
   const trips = [];
   for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(sep).map((v) => v.trim().replace(/"/g, ""));
+    const vals = splitCSVRow(lines[i], sep);
     if (vals.length < 3) continue;
 
     const rawDate = dateIdx >= 0 ? vals[dateIdx] : "";
@@ -209,6 +250,8 @@ export default function NSAnalyzer() {
   const [tab, setTab] = useState("upload");
   const [dragOver, setDragOver] = useState(false);
   const [parseError, setParseError] = useState("");
+  const [trajectPrice, setTrajectPrice] = useState("");
+  const [trajectRoute, setTrajectRoute] = useState(null);
 
   const loadDemo = () => {
     setTrips(DEMO_TRIPS);
@@ -245,6 +288,22 @@ export default function NSAnalyzer() {
     return Math.max(1, Math.round((max - min) / (30 * 24 * 60 * 60 * 1000) + 0.5));
   }, [classified]);
 
+  const routeOptions = useMemo(() => {
+    const routes = {};
+    classified.forEach((t) => {
+      const from = t.from;
+      const to = t.to;
+      const key = [from, to].sort().join("|");
+      if (!routes[key]) {
+        const [a, b] = [from, to].sort();
+        routes[key] = { from: a, to: b, label: `${a} ↔ ${b}`, count: 0, spend: 0 };
+      }
+      routes[key].count++;
+      routes[key].spend += t.price;
+    });
+    return Object.values(routes).sort((a, b) => b.spend - a.spend);
+  }, [classified]);
+
   const analysis = useMemo(() => {
     if (classified.length === 0) return null;
     const totalSpent = classified.reduce((s, t) => s + t.price, 0);
@@ -272,10 +331,19 @@ export default function NSAnalyzer() {
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dayData = dayNames.map((name, i) => ({ name, trips: dayDist[i] }));
 
-    const subCosts = SUBSCRIPTIONS.map((sub) => {
-      const result = calcSubscriptionCost(classified, sub, months);
-      return { ...sub, ...result, savings: totalSpent - result.total };
-    }).sort((a, b) => a.total - b.total);
+    const trajectMonthlyCost = parseFloat(trajectPrice) || 0;
+    const activeTrajectRoute = trajectRoute || (routeOptions.length > 0 ? routeOptions[0] : null);
+    const includeTraject = trajectMonthlyCost > 0;
+
+    const subCosts = SUBSCRIPTIONS
+      .filter((sub) => !sub.trajectFree || includeTraject)
+      .map((sub) => {
+        const effectiveSub = sub.trajectFree
+          ? { ...sub, monthlyCost: trajectMonthlyCost }
+          : sub;
+        const result = calcSubscriptionCost(classified, effectiveSub, months, sub.trajectFree ? activeTrajectRoute : null);
+        return { ...effectiveSub, ...result, savings: totalSpent - result.total };
+      }).sort((a, b) => a.total - b.total);
 
     const best = subCosts[0];
 
@@ -295,7 +363,7 @@ export default function NSAnalyzer() {
       subCosts,
       best,
     };
-  }, [classified, months]);
+  }, [classified, months, trajectPrice, trajectRoute, routeOptions]);
 
   const pieData = analysis
     ? [
@@ -418,12 +486,31 @@ export default function NSAnalyzer() {
               🚂 Load demo data (Rotterdam commuter)
             </button>
 
-            <div style={{ marginTop: 32, padding: 20, background: "#111827", borderRadius: 12, border: "1px solid #1e293b" }}>
-              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: "#94a3b8" }}>Expected CSV columns</div>
-              <div style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#64748b", lineHeight: 1.8 }}>
-                Datum/Date, Check-in/Vertrek, Check-uit/Aankomst, Vertrekstation/From, Bestemming/To, Prijs/Price, Klasse/Class
+            <div style={{ marginTop: 32 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#94a3b8" }}>FAQ</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {[
+                  {
+                    q: "Is my data safe?",
+                    a: "Yes. Your CSV is processed entirely in your browser. No data is uploaded to any server — everything stays on your device.",
+                  },
+                  {
+                    q: "Why does this exist?",
+                    a: "NS offers many subscriptions but makes it hard to figure out which one actually saves you money. This tool analyzes your real travel patterns so you stop overpaying.",
+                  },
+                  {
+                    q: "How much does it cost?",
+                    a: "Nothing. This tool is free and always will be.",
+                  },
+                ].map((faq, i) => (
+                  <div key={i} style={{ padding: "14px 18px", background: "#111827", borderRadius: 10, border: "1px solid #1e293b" }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{faq.q}</div>
+                    <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.6 }}>{faq.a}</div>
+                  </div>
+                ))}
               </div>
             </div>
+
           </div>
         )}
 
@@ -460,6 +547,23 @@ export default function NSAnalyzer() {
                 </div>
               </div>
             </div>
+
+            {/* Traject Vrij suggestion */}
+            {!trajectPrice && routeOptions.find((r) => r.count > 10) && (() => {
+              const frequentRoute = routeOptions.find((r) => r.count > 10);
+              return (
+                <div
+                  onClick={() => setTab("compare")}
+                  style={{ padding: "14px 18px", background: "#fb923c11", border: "1px solid #fb923c44", borderRadius: 12, marginBottom: 24, cursor: "pointer", transition: "border-color 0.2s" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fb923c")}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#fb923c44")}
+                >
+                  <div style={{ fontSize: 13, color: "#fb923c", lineHeight: 1.6 }}>
+                    You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a <strong>Traject Vrij</strong> subscription might save you money. <span style={{ textDecoration: "underline" }}>Configure it in Subscriptions</span> to compare.
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* KPI cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
@@ -543,12 +647,67 @@ export default function NSAnalyzer() {
         {tab === "compare" && analysis && (
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Subscription Comparison</h2>
-            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>
-              Total cost over your {months}-month travel period. Prices are estimates based on 2025 rates.
+            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>
+              Total cost over your {months}-month travel period.
             </p>
 
+            <div style={{ padding: "14px 18px", background: "#1e1a0e", border: "1px solid #854d0e44", borderRadius: 10, marginBottom: 20, fontSize: 13, color: "#d97706", lineHeight: 1.6 }}>
+              Note: the prices in your CSV reflect what you actually paid with your current subscription. This tool does not account for that — it compares subscriptions as if all trips were at full price. Trips that were discounted by your current subscription will appear cheaper than they would be without one.
+            </div>
+
+            {/* Traject Vrij config */}
+            {(() => {
+              const frequentRoute = routeOptions.find((r) => r.count > 10);
+              return (
+                <div style={{ padding: "16px 20px", background: "#111827", border: `1px solid ${frequentRoute && !trajectPrice ? "#fb923c44" : "#1e293b"}`, borderRadius: 12, marginBottom: 20 }}>
+                  {frequentRoute && !trajectPrice && (
+                    <div style={{ padding: "10px 14px", background: "#fb923c11", borderRadius: 8, marginBottom: 12, fontSize: 13, color: "#fb923c", lineHeight: 1.6 }}>
+                      You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a Traject Vrij subscription might save you money. Enter the monthly price from ns.nl to compare.
+                    </div>
+                  )}
+                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: "#fb923c" }}>Traject Vrij</div>
+                  <div style={{ display: "flex", gap: 16, alignItems: "end", flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <label style={{ fontSize: 12, color: "#94a3b8", display: "block", marginBottom: 4 }}>Route</label>
+                      <select
+                        value={trajectRoute ? `${trajectRoute.from}|${trajectRoute.to}` : ""}
+                        onChange={(e) => {
+                          const opt = routeOptions.find((r) => `${r.from}|${r.to}` === e.target.value);
+                          setTrajectRoute(opt || null);
+                        }}
+                        style={{ width: "100%", padding: "8px 10px", background: "#0a0e1a", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                      >
+                        {routeOptions.map((r) => (
+                          <option key={`${r.from}|${r.to}`} value={`${r.from}|${r.to}`}>
+                            {r.label} ({r.count} trips)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ minWidth: 160 }}>
+                      <label style={{ fontSize: 12, color: "#94a3b8", display: "block", marginBottom: 4 }}>Monthly price (from ns.nl)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="e.g. 95.00"
+                        value={trajectPrice}
+                        onChange={(e) => setTrajectPrice(e.target.value)}
+                        style={{ width: "100%", padding: "8px 10px", background: "#0a0e1a", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13, fontFamily: "JetBrains Mono" }}
+                      />
+                    </div>
+                  </div>
+                  {!trajectPrice && (
+                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>
+                      Enter the monthly price to include Traject Vrij in the comparison.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             <div style={{ marginBottom: 28 }}>
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={Math.max(200, analysis.subCosts.length * 40)}>
                 <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 120 }}>
                   <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `€${v}`} />
                   <YAxis type="category" dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={120} />
@@ -565,7 +724,7 @@ export default function NSAnalyzer() {
               </ResponsiveContainer>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
               {analysis.subCosts.map((s) => {
                 const isBest = s.id === analysis.best.id;
                 return (
