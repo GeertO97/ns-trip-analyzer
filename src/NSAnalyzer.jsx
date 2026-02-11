@@ -245,6 +245,8 @@ function parseCSV(text) {
 
 const fmt = (n) => `€${n.toFixed(2)}`;
 
+const TOOLTIP_STYLE = { background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" };
+
 export default function NSAnalyzer() {
   const [trips, setTrips] = useState([]);
   const [tab, setTab] = useState("upload");
@@ -374,46 +376,30 @@ export default function NSAnalyzer() {
     : [];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#e2e8f0", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #151b2e; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-      `}</style>
-
+    <div className="min-h-screen bg-ns-bg text-ns-text font-sans">
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)", padding: "24px 32px", display: "flex", alignItems: "center", gap: 16 }}>
-        <div style={{ width: 44, height: 44, background: "#1e293b", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "#fbbf24", fontFamily: "JetBrains Mono" }}>
+      <div className="bg-gradient-to-br from-ns-yellow to-ns-yellow-dark px-4 py-5 sm:px-8 flex items-center gap-4">
+        <div className="w-11 h-11 bg-ns-card rounded-[10px] flex items-center justify-center text-xl font-bold text-ns-yellow font-mono shrink-0">
           NS
         </div>
         <div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.5px" }}>NS Trip Analyzer</div>
-          <div style={{ fontSize: 13, color: "#44403c", fontWeight: 500 }}>Optimize your Dutch rail subscription</div>
+          <div className="text-lg sm:text-[22px] font-bold text-ns-dark tracking-tight">NS Trip Analyzer</div>
+          <div className="text-[13px] text-[#44403c] font-medium">Optimize your Dutch rail subscription</div>
         </div>
       </div>
 
       {/* Tabs */}
       {trips.length > 0 && (
-        <div style={{ display: "flex", gap: 2, padding: "12px 32px 0", background: "#0f1525", borderBottom: "1px solid #1e293b" }}>
+        <div className="flex gap-0.5 px-4 sm:px-8 pt-3 bg-ns-surface-alt border-b border-ns-border overflow-x-auto">
           {["overview", "routes", "compare", "trips", "upload"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              style={{
-                padding: "10px 20px",
-                background: tab === t ? "#1e293b" : "transparent",
-                color: tab === t ? "#fbbf24" : "#94a3b8",
-                border: "none",
-                borderRadius: "8px 8px 0 0",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: 13,
-                fontWeight: tab === t ? 700 : 500,
-                textTransform: "capitalize",
-                transition: "all 0.15s",
-              }}
+              className={`px-4 sm:px-5 py-2.5 border-none rounded-t-lg cursor-pointer font-sans text-[13px] capitalize transition-all whitespace-nowrap ${
+                tab === t
+                  ? "bg-ns-card text-ns-yellow font-bold"
+                  : "bg-transparent text-ns-text-muted font-medium hover:text-ns-text"
+              }`}
             >
               {t === "compare" ? "Subscriptions" : t}
             </button>
@@ -421,15 +407,15 @@ export default function NSAnalyzer() {
         </div>
       )}
 
-      <div style={{ padding: "24px 32px", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 py-6 max-w-[1100px] mx-auto">
         {/* Upload Tab */}
         {(tab === "upload" || trips.length === 0) && (
-          <div>
-            <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Import your NS trips</h2>
-              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6 }}>
+          <div className="animate-fade-in-up">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold mb-2">Import your NS trips</h2>
+              <p className="text-ns-text-muted text-sm leading-relaxed">
                 Upload your NS trip history CSV from{" "}
-                <span style={{ color: "#fbbf24", fontWeight: 600 }}>ns.nl → Mijn NS → Reishistorie</span>. We'll analyze your travel patterns and find the cheapest subscription.
+                <span className="text-ns-yellow font-semibold">ns.nl → Mijn NS → Reishistorie</span>. We'll analyze your travel patterns and find the cheapest subscription.
               </p>
             </div>
 
@@ -438,57 +424,37 @@ export default function NSAnalyzer() {
               onDragLeave={() => setDragOver(false)}
               onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
               onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".csv,.tsv,.txt"; inp.onchange = (e) => e.target.files[0] && handleFile(e.target.files[0]); inp.click(); }}
-              style={{
-                border: `2px dashed ${dragOver ? "#fbbf24" : "#334155"}`,
-                borderRadius: 16,
-                padding: "48px 32px",
-                textAlign: "center",
-                cursor: "pointer",
-                background: dragOver ? "rgba(251, 191, 36, 0.05)" : "#111827",
-                transition: "all 0.2s",
-                marginBottom: 20,
-              }}
+              className={`border-2 border-dashed rounded-2xl px-8 py-12 text-center cursor-pointer transition-all mb-5 ${
+                dragOver
+                  ? "border-ns-yellow bg-ns-yellow/5"
+                  : "border-ns-border-subtle bg-ns-surface hover:border-ns-text-dim"
+              }`}
             >
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📂</div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Drop your CSV here or click to browse</div>
-              <div style={{ fontSize: 13, color: "#64748b" }}>Supports NS export format (CSV, TSV)</div>
+              <div className="text-[40px] mb-3">📂</div>
+              <div className="text-base font-semibold mb-1.5">Drop your CSV here or click to browse</div>
+              <div className="text-[13px] text-ns-text-dim">Supports NS export format (CSV, TSV)</div>
             </div>
 
             {parseError && (
-              <div style={{ padding: "12px 16px", background: "#7f1d1d33", border: "1px solid #dc262644", borderRadius: 10, color: "#fca5a5", fontSize: 13, marginBottom: 20 }}>
+              <div className="px-4 py-3 bg-red-900/20 border border-ns-red/25 rounded-[10px] text-red-300 text-[13px] mb-5">
                 {parseError}
               </div>
             )}
 
-            <div style={{ textAlign: "center", margin: "20px 0" }}>
-              <span style={{ color: "#475569", fontSize: 13 }}>or</span>
+            <div className="text-center my-5">
+              <span className="text-ns-text-faint text-[13px]">or</span>
             </div>
 
             <button
               onClick={loadDemo}
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "14px",
-                background: "linear-gradient(135deg, #1e293b, #0f172a)",
-                border: "1px solid #334155",
-                borderRadius: 12,
-                color: "#e2e8f0",
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "border-color 0.2s",
-              }}
-              onMouseEnter={(e) => (e.target.style.borderColor = "#fbbf24")}
-              onMouseLeave={(e) => (e.target.style.borderColor = "#334155")}
+              className="block w-full py-3.5 bg-gradient-to-br from-ns-card to-ns-dark border border-ns-border-subtle rounded-xl text-ns-text text-sm font-semibold cursor-pointer font-sans transition-colors hover:border-ns-yellow"
             >
               🚂 Load demo data (Rotterdam commuter)
             </button>
 
-            <div style={{ marginTop: 32 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#94a3b8" }}>FAQ</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="mt-8">
+              <h3 className="text-base font-bold mb-4 text-ns-text-muted">FAQ</h3>
+              <div className="flex flex-col gap-3">
                 {[
                   {
                     q: "Is my data safe?",
@@ -503,46 +469,34 @@ export default function NSAnalyzer() {
                     a: "Nothing. This tool is free and always will be.",
                   },
                 ].map((faq, i) => (
-                  <div key={i} style={{ padding: "14px 18px", background: "#111827", borderRadius: 10, border: "1px solid #1e293b" }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{faq.q}</div>
-                    <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.6 }}>{faq.a}</div>
+                  <div key={i} className="p-3.5 bg-ns-surface rounded-[10px] border border-ns-border hover:border-ns-border-subtle transition-colors">
+                    <div className="text-sm font-semibold mb-1">{faq.q}</div>
+                    <div className="text-[13px] text-ns-text-muted leading-relaxed">{faq.a}</div>
                   </div>
                 ))}
               </div>
             </div>
-
           </div>
         )}
 
         {/* Overview Tab */}
         {tab === "overview" && analysis && (
-          <div>
+          <div className="animate-fade-in-up">
             {/* Recommendation Banner */}
-            <div
-              style={{
-                background: "linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.03))",
-                border: "1px solid rgba(251,191,36,0.3)",
-                borderRadius: 16,
-                padding: "20px 24px",
-                marginBottom: 24,
-                display: "flex",
-                alignItems: "center",
-                gap: 16,
-              }}
-            >
-              <div style={{ fontSize: 32 }}>🏆</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, color: "#fbbf24", fontWeight: 600, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <div className="bg-gradient-to-br from-ns-yellow/12 to-ns-yellow/3 border border-ns-yellow/30 rounded-2xl px-5 py-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="text-[32px]">🏆</div>
+              <div className="flex-1">
+                <div className="text-[13px] text-ns-yellow font-semibold mb-1 uppercase tracking-wide">
                   Best subscription for you
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 700 }}>{analysis.best.name}</div>
-                <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 2 }}>{analysis.best.description}</div>
+                <div className="text-xl font-bold">{analysis.best.name}</div>
+                <div className="text-[13px] text-ns-text-muted mt-0.5">{analysis.best.description}</div>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: "#34d399", fontFamily: "JetBrains Mono" }}>
+              <div className="sm:text-right">
+                <div className="text-2xl font-bold text-ns-green font-mono">
                   {analysis.best.savings > 0 ? `${fmt(analysis.best.savings)}` : "—"}
                 </div>
-                <div style={{ fontSize: 12, color: "#64748b" }}>
+                <div className="text-xs text-ns-text-dim">
                   {analysis.best.savings > 0 ? `saved over ${months} mo.` : "already optimal"}
                 </div>
               </div>
@@ -554,42 +508,40 @@ export default function NSAnalyzer() {
               return (
                 <div
                   onClick={() => setTab("compare")}
-                  style={{ padding: "14px 18px", background: "#fb923c11", border: "1px solid #fb923c44", borderRadius: 12, marginBottom: 24, cursor: "pointer", transition: "border-color 0.2s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fb923c")}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#fb923c44")}
+                  className="p-3.5 bg-ns-orange/5 border border-ns-orange/25 rounded-xl mb-6 cursor-pointer transition-colors hover:border-ns-orange"
                 >
-                  <div style={{ fontSize: 13, color: "#fb923c", lineHeight: 1.6 }}>
-                    You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a <strong>Traject Vrij</strong> subscription might save you money. <span style={{ textDecoration: "underline" }}>Configure it in Subscriptions</span> to compare.
+                  <div className="text-[13px] text-ns-orange leading-relaxed">
+                    You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a <strong>Traject Vrij</strong> subscription might save you money. <span className="underline">Configure it in Subscriptions</span> to compare.
                   </div>
                 </div>
               );
             })()}
 
             {/* KPI cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
               {[
                 { label: "Total trips", value: analysis.totalTrips, sub: `over ${months} month${months > 1 ? "s" : ""}` },
                 { label: "Total spent", value: fmt(analysis.totalSpent), sub: `${fmt(analysis.avgPerMonth)}/month` },
                 { label: "Peak trips", value: analysis.peakTrips, sub: fmt(analysis.peakSpend) },
                 { label: "Off-peak / Weekend", value: `${analysis.offPeakTrips} / ${analysis.weekendTrips}`, sub: fmt(analysis.offPeakSpend + analysis.weekendSpend) },
               ].map((kpi, i) => (
-                <div key={i} style={{ background: "#111827", borderRadius: 12, padding: "16px 18px", border: "1px solid #1e293b" }}>
-                  <div style={{ fontSize: 12, color: "#64748b", fontWeight: 500, marginBottom: 6 }}>{kpi.label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 700, fontFamily: "JetBrains Mono", letterSpacing: "-0.5px" }}>{kpi.value}</div>
-                  <div style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>{kpi.sub}</div>
+                <div key={i} className="bg-ns-surface rounded-xl p-4 border border-ns-border hover:border-ns-border-subtle transition-all hover:-translate-y-0.5">
+                  <div className="text-xs text-ns-text-dim font-medium mb-1.5">{kpi.label}</div>
+                  <div className="text-xl sm:text-[22px] font-bold font-mono tracking-tight">{kpi.value}</div>
+                  <div className="text-xs text-ns-text-faint mt-0.5">{kpi.sub}</div>
                 </div>
               ))}
             </div>
 
             {/* Charts row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-              <div style={{ background: "#111827", borderRadius: 12, padding: "18px 20px", border: "1px solid #1e293b" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Trips by day of week</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-ns-surface rounded-xl p-4 sm:p-5 border border-ns-border">
+                <div className="text-sm font-semibold mb-4">Trips by day of week</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={analysis.dayData}>
                     <XAxis dataKey="name" tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
-                    <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" }} />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
                     <Bar dataKey="trips" radius={[4, 4, 0, 0]}>
                       {analysis.dayData.map((_, i) => (
                         <Cell key={i} fill={i === 0 || i === 6 ? "#a78bfa" : "#fbbf24"} />
@@ -599,8 +551,8 @@ export default function NSAnalyzer() {
                 </ResponsiveContainer>
               </div>
 
-              <div style={{ background: "#111827", borderRadius: 12, padding: "18px 20px", border: "1px solid #1e293b" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Spend distribution</div>
+              <div className="bg-ns-surface rounded-xl p-4 sm:p-5 border border-ns-border">
+                <div className="text-sm font-semibold mb-4">Spend distribution</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} strokeWidth={0}>
@@ -609,7 +561,7 @@ export default function NSAnalyzer() {
                       ))}
                     </Pie>
                     <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
-                    <Tooltip formatter={(v) => fmt(v)} contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" }} />
+                    <Tooltip formatter={(v) => fmt(v)} contentStyle={TOOLTIP_STYLE} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -619,22 +571,25 @@ export default function NSAnalyzer() {
 
         {/* Routes Tab */}
         {tab === "routes" && analysis && (
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Top Routes</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="animate-fade-in-up">
+            <h2 className="text-lg font-bold mb-4">Top Routes</h2>
+            <div className="flex flex-col gap-2.5">
               {analysis.topRoutes.map((r, i) => {
                 const pct = (r.spend / analysis.totalSpent) * 100;
                 return (
-                  <div key={i} style={{ background: "#111827", borderRadius: 12, padding: "16px 20px", border: "1px solid #1e293b" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div key={i} className="bg-ns-surface rounded-xl p-4 sm:px-5 border border-ns-border hover:border-ns-border-subtle transition-all hover:-translate-y-0.5">
+                    <div className="flex justify-between items-center mb-2.5">
                       <div>
-                        <span style={{ fontSize: 15, fontWeight: 600 }}>{r.route}</span>
-                        <span style={{ fontSize: 12, color: "#64748b", marginLeft: 10 }}>{r.count} trips</span>
+                        <span className="text-[15px] font-semibold">{r.route}</span>
+                        <span className="text-xs text-ns-text-dim ml-2.5">{r.count} trips</span>
                       </div>
-                      <div style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: "#fbbf24" }}>{fmt(r.spend)}</div>
+                      <div className="font-mono text-[15px] font-semibold text-ns-yellow">{fmt(r.spend)}</div>
                     </div>
-                    <div style={{ height: 6, background: "#1e293b", borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #fbbf24, #f59e0b)", borderRadius: 3, transition: "width 0.5s" }} />
+                    <div className="h-1.5 bg-ns-card rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-ns-yellow to-ns-yellow-dark transition-[width] duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
                   </div>
                 );
@@ -645,13 +600,13 @@ export default function NSAnalyzer() {
 
         {/* Subscription Comparison Tab */}
         {tab === "compare" && analysis && (
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Subscription Comparison</h2>
-            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>
+          <div className="animate-fade-in-up">
+            <h2 className="text-lg font-bold mb-1.5">Subscription Comparison</h2>
+            <p className="text-[13px] text-ns-text-dim mb-4">
               Total cost over your {months}-month travel period.
             </p>
 
-            <div style={{ padding: "14px 18px", background: "#1e1a0e", border: "1px solid #854d0e44", borderRadius: 10, marginBottom: 20, fontSize: 13, color: "#d97706", lineHeight: 1.6 }}>
+            <div className="p-3.5 bg-[#1e1a0e] border border-[#854d0e44] rounded-[10px] mb-5 text-[13px] text-amber-600 leading-relaxed">
               Note: the prices in your CSV reflect what you actually paid with your current subscription. This tool does not account for that — it compares subscriptions as if all trips were at full price. Trips that were discounted by your current subscription will appear cheaper than they would be without one.
             </div>
 
@@ -659,23 +614,23 @@ export default function NSAnalyzer() {
             {(() => {
               const frequentRoute = routeOptions.find((r) => r.count > 10);
               return (
-                <div style={{ padding: "16px 20px", background: "#111827", border: `1px solid ${frequentRoute && !trajectPrice ? "#fb923c44" : "#1e293b"}`, borderRadius: 12, marginBottom: 20 }}>
+                <div className={`p-4 sm:p-5 bg-ns-surface border rounded-xl mb-5 ${frequentRoute && !trajectPrice ? "border-ns-orange/25" : "border-ns-border"}`}>
                   {frequentRoute && !trajectPrice && (
-                    <div style={{ padding: "10px 14px", background: "#fb923c11", borderRadius: 8, marginBottom: 12, fontSize: 13, color: "#fb923c", lineHeight: 1.6 }}>
+                    <div className="p-2.5 sm:p-3.5 bg-ns-orange/5 rounded-lg mb-3 text-[13px] text-ns-orange leading-relaxed">
                       You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a Traject Vrij subscription might save you money. Enter the monthly price from ns.nl to compare.
                     </div>
                   )}
-                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: "#fb923c" }}>Traject Vrij</div>
-                  <div style={{ display: "flex", gap: 16, alignItems: "end", flexWrap: "wrap" }}>
-                    <div style={{ flex: 1, minWidth: 200 }}>
-                      <label style={{ fontSize: 12, color: "#94a3b8", display: "block", marginBottom: 4 }}>Route</label>
+                  <div className="text-sm font-semibold mb-2.5 text-ns-orange">Traject Vrij</div>
+                  <div className="flex gap-4 items-end flex-wrap">
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="text-xs text-ns-text-muted block mb-1">Route</label>
                       <select
                         value={trajectRoute ? `${trajectRoute.from}|${trajectRoute.to}` : ""}
                         onChange={(e) => {
                           const opt = routeOptions.find((r) => `${r.from}|${r.to}` === e.target.value);
                           setTrajectRoute(opt || null);
                         }}
-                        style={{ width: "100%", padding: "8px 10px", background: "#0a0e1a", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                        className="w-full py-2 px-2.5 bg-ns-bg border border-ns-border-subtle rounded-lg text-ns-text text-[13px] font-sans"
                       >
                         {routeOptions.map((r) => (
                           <option key={`${r.from}|${r.to}`} value={`${r.from}|${r.to}`}>
@@ -684,8 +639,8 @@ export default function NSAnalyzer() {
                         ))}
                       </select>
                     </div>
-                    <div style={{ minWidth: 160 }}>
-                      <label style={{ fontSize: 12, color: "#94a3b8", display: "block", marginBottom: 4 }}>Monthly price (from ns.nl)</label>
+                    <div className="min-w-[160px]">
+                      <label className="text-xs text-ns-text-muted block mb-1">Monthly price (from ns.nl)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -693,12 +648,12 @@ export default function NSAnalyzer() {
                         placeholder="e.g. 95.00"
                         value={trajectPrice}
                         onChange={(e) => setTrajectPrice(e.target.value)}
-                        style={{ width: "100%", padding: "8px 10px", background: "#0a0e1a", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13, fontFamily: "JetBrains Mono" }}
+                        className="w-full py-2 px-2.5 bg-ns-bg border border-ns-border-subtle rounded-lg text-ns-text text-[13px] font-mono"
                       />
                     </div>
                   </div>
                   {!trajectPrice && (
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>
+                    <div className="text-xs text-ns-text-dim mt-2">
                       Enter the monthly price to include Traject Vrij in the comparison.
                     </div>
                   )}
@@ -706,13 +661,13 @@ export default function NSAnalyzer() {
               );
             })()}
 
-            <div style={{ marginBottom: 28 }}>
+            <div className="mb-7">
               <ResponsiveContainer width="100%" height={Math.max(200, analysis.subCosts.length * 40)}>
                 <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 120 }}>
                   <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `€${v}`} />
                   <YAxis type="category" dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={120} />
                   <Tooltip
-                    contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" }}
+                    contentStyle={TOOLTIP_STYLE}
                     formatter={(v) => fmt(v)}
                   />
                   <Bar dataKey="total" radius={[0, 6, 6, 0]} barSize={24}>
@@ -724,41 +679,39 @@ export default function NSAnalyzer() {
               </ResponsiveContainer>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
               {analysis.subCosts.map((s) => {
                 const isBest = s.id === analysis.best.id;
                 return (
                   <div
                     key={s.id}
-                    style={{
-                      background: isBest ? "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02))" : "#111827",
-                      borderRadius: 14,
-                      padding: "18px 20px",
-                      border: `1px solid ${isBest ? "rgba(251,191,36,0.4)" : "#1e293b"}`,
-                      position: "relative",
-                    }}
+                    className={`rounded-[14px] p-4 sm:p-5 border relative transition-all hover:-translate-y-0.5 ${
+                      isBest
+                        ? "bg-gradient-to-br from-ns-yellow/10 to-ns-yellow/2 border-ns-yellow/40"
+                        : "bg-ns-surface border-ns-border hover:border-ns-border-subtle"
+                    }`}
                   >
                     {isBest && (
-                      <div style={{ position: "absolute", top: -10, right: 14, background: "#fbbf24", color: "#0f172a", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      <div className="absolute -top-2.5 right-3.5 bg-ns-yellow text-ns-dark text-[10px] font-bold py-0.5 px-2.5 rounded-full uppercase tracking-wide">
                         Best fit
                       </div>
                     )}
-                    <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{s.name}</div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginBottom: 14 }}>{s.description}</div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: "#94a3b8" }}>Subscription</span>
-                      <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", fontWeight: 500 }}>{fmt(s.subscriptionCost)}</span>
+                    <div className="text-[15px] font-bold mb-1">{s.name}</div>
+                    <div className="text-xs text-ns-text-dim mb-3.5">{s.description}</div>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-xs text-ns-text-muted">Subscription</span>
+                      <span className="text-[13px] font-mono font-medium">{fmt(s.subscriptionCost)}</span>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: "#94a3b8" }}>Trip costs</span>
-                      <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", fontWeight: 500 }}>{fmt(s.tripCost)}</span>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-xs text-ns-text-muted">Trip costs</span>
+                      <span className="text-[13px] font-mono font-medium">{fmt(s.tripCost)}</span>
                     </div>
-                    <div style={{ borderTop: "1px solid #1e293b", paddingTop: 8, marginTop: 8, display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>Total</span>
-                      <span style={{ fontSize: 16, fontFamily: "JetBrains Mono", fontWeight: 700, color: isBest ? "#fbbf24" : "#e2e8f0" }}>{fmt(s.total)}</span>
+                    <div className="border-t border-ns-border pt-2 mt-2 flex justify-between">
+                      <span className="text-[13px] font-semibold">Total</span>
+                      <span className={`text-base font-mono font-bold ${isBest ? "text-ns-yellow" : "text-ns-text"}`}>{fmt(s.total)}</span>
                     </div>
                     {s.savings > 0 && (
-                      <div style={{ marginTop: 8, fontSize: 12, color: "#34d399", fontWeight: 600, textAlign: "right" }}>
+                      <div className="mt-2 text-xs text-ns-green font-semibold text-right">
                         Save {fmt(s.savings)} vs no subscription
                       </div>
                     )}
@@ -771,17 +724,17 @@ export default function NSAnalyzer() {
 
         {/* Trips Tab */}
         {tab === "trips" && classified.length > 0 && (
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>
-              All Trips <span style={{ fontSize: 13, fontWeight: 400, color: "#64748b" }}>({classified.length})</span>
+          <div className="animate-fade-in-up">
+            <h2 className="text-lg font-bold mb-4">
+              All Trips <span className="text-[13px] font-normal text-ns-text-dim">({classified.length})</span>
             </h2>
-            <div style={{ background: "#111827", borderRadius: 12, border: "1px solid #1e293b", overflow: "hidden" }}>
-              <div style={{ maxHeight: 500, overflowY: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <div className="bg-ns-surface rounded-xl border border-ns-border overflow-hidden">
+              <div className="max-h-[500px] overflow-y-auto">
+                <table className="w-full border-collapse text-[13px]">
                   <thead>
-                    <tr style={{ background: "#0f172a", position: "sticky", top: 0 }}>
+                    <tr className="bg-ns-dark sticky top-0 z-10">
                       {["Date", "From", "To", "Time", "Type", "Price"].map((h) => (
-                        <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "#94a3b8", fontSize: 12, borderBottom: "1px solid #1e293b" }}>
+                        <th key={h} className="py-2.5 px-3.5 text-left font-semibold text-ns-text-muted text-xs border-b border-ns-border">
                           {h}
                         </th>
                       ))}
@@ -789,26 +742,25 @@ export default function NSAnalyzer() {
                   </thead>
                   <tbody>
                     {classified.map((t, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #1e293b11" }}>
-                        <td style={{ padding: "8px 14px", fontFamily: "JetBrains Mono", fontSize: 12 }}>{t.date}</td>
-                        <td style={{ padding: "8px 14px" }}>{t.from}</td>
-                        <td style={{ padding: "8px 14px" }}>{t.to}</td>
-                        <td style={{ padding: "8px 14px", fontFamily: "JetBrains Mono", fontSize: 12, color: "#94a3b8" }}>{t.checkin}</td>
-                        <td style={{ padding: "8px 14px" }}>
+                      <tr key={i} className="border-b border-ns-border/10 hover:bg-ns-card/30 transition-colors">
+                        <td className="py-2 px-3.5 font-mono text-xs">{t.date}</td>
+                        <td className="py-2 px-3.5">{t.from}</td>
+                        <td className="py-2 px-3.5">{t.to}</td>
+                        <td className="py-2 px-3.5 font-mono text-xs text-ns-text-muted">{t.checkin}</td>
+                        <td className="py-2 px-3.5">
                           <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 600,
-                              padding: "2px 8px",
-                              borderRadius: 20,
-                              background: t.isPeak ? "#dc262622" : t.isWeekend ? "#8b5cf622" : "#0ea5e922",
-                              color: t.isPeak ? "#fca5a5" : t.isWeekend ? "#c4b5fd" : "#67e8f9",
-                            }}
+                            className={`text-[11px] font-semibold py-0.5 px-2 rounded-full ${
+                              t.isPeak
+                                ? "bg-red-600/15 text-red-300"
+                                : t.isWeekend
+                                  ? "bg-violet-500/15 text-violet-300"
+                                  : "bg-cyan-500/15 text-cyan-300"
+                            }`}
                           >
                             {t.isPeak ? "Peak" : t.isWeekend ? "Weekend" : "Off-peak"}
                           </span>
                         </td>
-                        <td style={{ padding: "8px 14px", fontFamily: "JetBrains Mono", fontWeight: 600 }}>{fmt(t.price)}</td>
+                        <td className="py-2 px-3.5 font-mono font-semibold">{fmt(t.price)}</td>
                       </tr>
                     ))}
                   </tbody>

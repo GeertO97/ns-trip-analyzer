@@ -1,11 +1,51 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-ns-yellow: #fbbf24;
+  --color-ns-yellow-dark: #f59e0b;
+  --color-ns-bg: #0a0e1a;
+  --color-ns-surface: #111827;
+  --color-ns-surface-alt: #0f1525;
+  --color-ns-card: #1e293b;
+  --color-ns-border: #1e293b;
+  --color-ns-border-subtle: #334155;
+  --color-ns-text: #e2e8f0;
+  --color-ns-text-muted: #94a3b8;
+  --color-ns-text-dim: #64748b;
+  --color-ns-text-faint: #475569;
+  --color-ns-dark: #0f172a;
+  --color-ns-green: #34d399;
+  --color-ns-red: #dc2626;
+  --color-ns-orange: #fb923c;
+
+  --font-sans: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --animate-fade-in-up: fade-in-up 0.4s ease-out both;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #151b2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
 }
