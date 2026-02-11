@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/ns-trip-analyzer/sw.js', { scope: '/ns-trip-analyzer/' })})}
