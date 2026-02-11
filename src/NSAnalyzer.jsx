@@ -378,13 +378,13 @@ export default function NSAnalyzer() {
   return (
     <div className="min-h-screen bg-ns-bg text-ns-text font-sans">
       {/* Header */}
-      <div className="bg-gradient-to-br from-ns-yellow to-ns-yellow-dark px-4 py-5 sm:px-8 flex items-center gap-4">
-        <div className="w-11 h-11 bg-ns-card rounded-[10px] flex items-center justify-center text-xl font-bold text-ns-yellow font-mono shrink-0">
+      <div className="border-t-[3px] border-t-ns-yellow bg-ns-surface-alt px-4 py-5 sm:px-8 flex items-center gap-4">
+        <div className="w-11 h-11 bg-ns-yellow rounded-[10px] flex items-center justify-center text-xl font-bold text-ns-dark font-mono shrink-0">
           NS
         </div>
         <div>
-          <div className="text-lg sm:text-[22px] font-bold text-ns-dark tracking-tight">NS Trip Analyzer</div>
-          <div className="text-[13px] text-[#44403c] font-medium">Optimize your Dutch rail subscription</div>
+          <div className="text-lg sm:text-[22px] font-bold text-ns-text tracking-tight">NS Trip Analyzer</div>
+          <div className="text-[13px] text-ns-text-muted font-medium">Optimize your Dutch rail subscription</div>
         </div>
       </div>
 
@@ -398,7 +398,7 @@ export default function NSAnalyzer() {
               className={`px-4 sm:px-5 py-2.5 border-none rounded-t-lg cursor-pointer font-sans text-[13px] capitalize transition-all whitespace-nowrap ${
                 tab === t
                   ? "bg-ns-card text-ns-yellow font-bold"
-                  : "bg-transparent text-ns-text-muted font-medium hover:text-ns-text"
+                  : "bg-transparent text-ns-text-muted font-medium hover:text-ns-text hover:bg-white/5"
               }`}
             >
               {t === "compare" ? "Subscriptions" : t}
@@ -410,7 +410,7 @@ export default function NSAnalyzer() {
       <div className="px-4 sm:px-8 py-6 max-w-[1100px] mx-auto">
         {/* Upload Tab */}
         {(tab === "upload" || trips.length === 0) && (
-          <div className="animate-fade-in-up">
+          <div className="animate-fade-in-up max-w-lg mx-auto">
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2">Import your NS trips</h2>
               <p className="text-ns-text-muted text-sm leading-relaxed">
@@ -424,10 +424,10 @@ export default function NSAnalyzer() {
               onDragLeave={() => setDragOver(false)}
               onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
               onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".csv,.tsv,.txt"; inp.onchange = (e) => e.target.files[0] && handleFile(e.target.files[0]); inp.click(); }}
-              className={`border-2 border-dashed rounded-2xl px-8 py-12 text-center cursor-pointer transition-all mb-5 ${
+              className={`border-2 border-dashed rounded-2xl px-8 py-12 text-center cursor-pointer transition-all duration-300 mb-5 ${
                 dragOver
-                  ? "border-ns-yellow bg-ns-yellow/5"
-                  : "border-ns-border-subtle bg-ns-surface hover:border-ns-text-dim"
+                  ? "border-ns-yellow bg-ns-yellow/5 scale-[1.01]"
+                  : "border-ns-border-subtle bg-ns-surface hover:border-ns-yellow/50 hover:bg-ns-yellow/5"
               }`}
             >
               <div className="text-[40px] mb-3">📂</div>
@@ -447,7 +447,7 @@ export default function NSAnalyzer() {
 
             <button
               onClick={loadDemo}
-              className="block w-full py-3.5 bg-gradient-to-br from-ns-card to-ns-dark border border-ns-border-subtle rounded-xl text-ns-text text-sm font-semibold cursor-pointer font-sans transition-colors hover:border-ns-yellow"
+              className="block w-full py-3.5 bg-gradient-to-br from-ns-card to-ns-dark border border-ns-border-subtle rounded-xl text-ns-text text-sm font-semibold cursor-pointer font-sans transition-all duration-200 hover:border-ns-yellow hover:scale-[1.01] hover:shadow-lg hover:shadow-ns-yellow/10 active:scale-[0.99]"
             >
               🚂 Load demo data (Rotterdam commuter)
             </button>
@@ -483,7 +483,7 @@ export default function NSAnalyzer() {
         {tab === "overview" && analysis && (
           <div className="animate-fade-in-up">
             {/* Recommendation Banner */}
-            <div className="bg-gradient-to-br from-ns-yellow/12 to-ns-yellow/3 border border-ns-yellow/30 rounded-2xl px-5 py-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="bg-gradient-to-br from-ns-yellow/12 to-ns-yellow/3 border border-ns-yellow/30 rounded-2xl px-5 py-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 backdrop-blur-sm shadow-lg shadow-ns-yellow/5">
               <div className="text-[32px]">🏆</div>
               <div className="flex-1">
                 <div className="text-[13px] text-ns-yellow font-semibold mb-1 uppercase tracking-wide">
@@ -525,9 +525,9 @@ export default function NSAnalyzer() {
                 { label: "Peak trips", value: analysis.peakTrips, sub: fmt(analysis.peakSpend) },
                 { label: "Off-peak / Weekend", value: `${analysis.offPeakTrips} / ${analysis.weekendTrips}`, sub: fmt(analysis.offPeakSpend + analysis.weekendSpend) },
               ].map((kpi, i) => (
-                <div key={i} className="bg-ns-surface rounded-xl p-4 border border-ns-border hover:border-ns-border-subtle transition-all hover:-translate-y-0.5">
+                <div key={i} className="group bg-ns-surface/80 backdrop-blur-sm rounded-xl p-4 border border-ns-border hover:border-white/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20">
                   <div className="text-xs text-ns-text-dim font-medium mb-1.5">{kpi.label}</div>
-                  <div className="text-xl sm:text-[22px] font-bold font-mono tracking-tight">{kpi.value}</div>
+                  <div className="text-xl sm:text-[22px] font-bold font-mono tracking-tight group-hover:text-ns-yellow transition-colors">{kpi.value}</div>
                   <div className="text-xs text-ns-text-faint mt-0.5">{kpi.sub}</div>
                 </div>
               ))}
@@ -535,7 +535,7 @@ export default function NSAnalyzer() {
 
             {/* Charts row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-ns-surface rounded-xl p-4 sm:p-5 border border-ns-border">
+              <div className="bg-ns-surface/80 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-ns-border shadow-lg shadow-black/10">
                 <div className="text-sm font-semibold mb-4">Trips by day of week</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={analysis.dayData}>
@@ -551,7 +551,7 @@ export default function NSAnalyzer() {
                 </ResponsiveContainer>
               </div>
 
-              <div className="bg-ns-surface rounded-xl p-4 sm:p-5 border border-ns-border">
+              <div className="bg-ns-surface/80 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-ns-border shadow-lg shadow-black/10">
                 <div className="text-sm font-semibold mb-4">Spend distribution</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
@@ -577,7 +577,7 @@ export default function NSAnalyzer() {
               {analysis.topRoutes.map((r, i) => {
                 const pct = (r.spend / analysis.totalSpent) * 100;
                 return (
-                  <div key={i} className="bg-ns-surface rounded-xl p-4 sm:px-5 border border-ns-border hover:border-ns-border-subtle transition-all hover:-translate-y-0.5">
+                  <div key={i} className="bg-ns-surface/80 backdrop-blur-sm rounded-xl p-4 sm:px-5 border border-ns-border hover:border-white/10 transition-all duration-200 hover:translate-x-1 hover:shadow-lg hover:shadow-black/20">
                     <div className="flex justify-between items-center mb-2.5">
                       <div>
                         <span className="text-[15px] font-semibold">{r.route}</span>
@@ -606,7 +606,7 @@ export default function NSAnalyzer() {
               Total cost over your {months}-month travel period.
             </p>
 
-            <div className="p-3.5 bg-[#1e1a0e] border border-[#854d0e44] rounded-[10px] mb-5 text-[13px] text-amber-600 leading-relaxed">
+            <div className="p-3.5 bg-amber-950/30 border border-amber-800/30 rounded-[10px] mb-5 text-[13px] text-amber-400 leading-relaxed">
               Note: the prices in your CSV reflect what you actually paid with your current subscription. This tool does not account for that — it compares subscriptions as if all trips were at full price. Trips that were discounted by your current subscription will appear cheaper than they would be without one.
             </div>
 
@@ -630,7 +630,7 @@ export default function NSAnalyzer() {
                           const opt = routeOptions.find((r) => `${r.from}|${r.to}` === e.target.value);
                           setTrajectRoute(opt || null);
                         }}
-                        className="w-full py-2 px-2.5 bg-ns-bg border border-ns-border-subtle rounded-lg text-ns-text text-[13px] font-sans"
+                        className="w-full py-2 px-2.5 bg-ns-bg border border-ns-border-subtle rounded-lg text-ns-text text-[13px] font-sans focus:border-ns-yellow focus:ring-1 focus:ring-ns-yellow/30 focus:outline-none transition-colors"
                       >
                         {routeOptions.map((r) => (
                           <option key={`${r.from}|${r.to}`} value={`${r.from}|${r.to}`}>
@@ -648,7 +648,7 @@ export default function NSAnalyzer() {
                         placeholder="e.g. 95.00"
                         value={trajectPrice}
                         onChange={(e) => setTrajectPrice(e.target.value)}
-                        className="w-full py-2 px-2.5 bg-ns-bg border border-ns-border-subtle rounded-lg text-ns-text text-[13px] font-mono"
+                        className="w-full py-2 px-2.5 bg-ns-bg border border-ns-border-subtle rounded-lg text-ns-text text-[13px] font-mono focus:border-ns-yellow focus:ring-1 focus:ring-ns-yellow/30 focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -679,16 +679,16 @@ export default function NSAnalyzer() {
               </ResponsiveContainer>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {analysis.subCosts.map((s) => {
                 const isBest = s.id === analysis.best.id;
                 return (
                   <div
                     key={s.id}
-                    className={`rounded-[14px] p-4 sm:p-5 border relative transition-all hover:-translate-y-0.5 ${
+                    className={`rounded-[14px] p-4 sm:p-5 border relative transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
                       isBest
-                        ? "bg-gradient-to-br from-ns-yellow/10 to-ns-yellow/2 border-ns-yellow/40"
-                        : "bg-ns-surface border-ns-border hover:border-ns-border-subtle"
+                        ? "bg-gradient-to-br from-ns-yellow/10 to-ns-yellow/2 border-ns-yellow/40 shadow-lg shadow-ns-yellow/10"
+                        : "bg-ns-surface/80 backdrop-blur-sm border-ns-border hover:border-white/10 hover:shadow-black/20"
                     }`}
                   >
                     {isBest && (
@@ -728,11 +728,11 @@ export default function NSAnalyzer() {
             <h2 className="text-lg font-bold mb-4">
               All Trips <span className="text-[13px] font-normal text-ns-text-dim">({classified.length})</span>
             </h2>
-            <div className="bg-ns-surface rounded-xl border border-ns-border overflow-hidden">
-              <div className="max-h-[500px] overflow-y-auto">
+            <div className="bg-ns-surface/80 backdrop-blur-sm rounded-xl border border-ns-border overflow-hidden shadow-lg shadow-black/10">
+              <div className="max-h-[500px] overflow-x-auto overflow-y-auto">
                 <table className="w-full border-collapse text-[13px]">
                   <thead>
-                    <tr className="bg-ns-dark sticky top-0 z-10">
+                    <tr className="bg-ns-dark/90 backdrop-blur-sm sticky top-0 z-10">
                       {["Date", "From", "To", "Time", "Type", "Price"].map((h) => (
                         <th key={h} className="py-2.5 px-3.5 text-left font-semibold text-ns-text-muted text-xs border-b border-ns-border">
                           {h}
@@ -742,7 +742,7 @@ export default function NSAnalyzer() {
                   </thead>
                   <tbody>
                     {classified.map((t, i) => (
-                      <tr key={i} className="border-b border-ns-border/10 hover:bg-ns-card/30 transition-colors">
+                      <tr key={i} className="border-b border-ns-border/10 even:bg-white/[0.02] hover:bg-white/5 transition-colors">
                         <td className="py-2 px-3.5 font-mono text-xs">{t.date}</td>
                         <td className="py-2 px-3.5">{t.from}</td>
                         <td className="py-2 px-3.5">{t.to}</td>
