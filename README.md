@@ -1,5 +1,7 @@
 # NS Trip Analyzer
 
+**Live:** https://geerto97.github.io/ns-trip-analyzer/
+
 A small PWA that analyzes your Dutch Railways (NS) trip history and recommends the cheapest NS subscription for your travel pattern. Upload the CSV you can export from `ns.nl → Mijn NS → Reishistorie` (everything is processed locally in the browser — no data leaves your device) and it breaks down your spend by peak / off-peak / weekend, surfaces your top routes, and compares all standard NS subscriptions (including a configurable Traject Vrij) over your actual travel window.
 
 Built with React + Vite + Recharts and shipped as a PWA. Deployed to GitHub Pages via the workflow in `.github/workflows/deploy.yml`.
