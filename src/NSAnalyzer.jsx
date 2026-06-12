@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
 
 const SUBSCRIPTIONS = [
@@ -141,8 +141,10 @@ const DEMO_TRIPS = [
 ];
 
 function classifyTrip(trip) {
-  const d = new Date(trip.date);
-  const day = d.getDay();
+  // Parse YYYY-MM-DD as a local date (not UTC) so weekday is correct regardless of timezone.
+  const [y, m, d] = trip.date.split("-").map(Number);
+  const dateObj = new Date(y, (m || 1) - 1, d || 1);
+  const day = dateObj.getDay();
   const isWeekend = day === 0 || day === 6;
   const hour = parseInt(trip.checkin.split(":")[0], 10);
   const minute = parseInt(trip.checkin.split(":")[1], 10);
@@ -252,6 +254,7 @@ export default function NSAnalyzer() {
   const [parseError, setParseError] = useState("");
   const [trajectPrice, setTrajectPrice] = useState("");
   const [trajectRoute, setTrajectRoute] = useState(null);
+  const fileInputRef = useRef(null);
 
   const loadDemo = () => {
     setTrips(DEMO_TRIPS);
@@ -282,10 +285,14 @@ export default function NSAnalyzer() {
 
   const months = useMemo(() => {
     if (classified.length === 0) return 1;
-    const dates = classified.map((t) => new Date(t.date));
-    const min = Math.min(...dates);
-    const max = Math.max(...dates);
-    return Math.max(1, Math.round((max - min) / (30 * 24 * 60 * 60 * 1000) + 0.5));
+    const times = classified.map((t) => {
+      const [y, m, d] = t.date.split("-").map(Number);
+      return new Date(y, (m || 1) - 1, d || 1).getTime();
+    });
+    const min = Math.min(...times);
+    const max = Math.max(...times);
+    const days = (max - min) / (24 * 60 * 60 * 1000);
+    return Math.max(1, Math.ceil(days / 30));
   }, [classified]);
 
   const routeOptions = useMemo(() => {
@@ -325,7 +332,8 @@ export default function NSAnalyzer() {
 
     const dayDist = [0, 0, 0, 0, 0, 0, 0];
     classified.forEach((t) => {
-      const day = new Date(t.date).getDay();
+      const [y, m, d] = t.date.split("-").map(Number);
+      const day = new Date(y, (m || 1) - 1, d || 1).getDay();
       dayDist[day]++;
     });
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -376,8 +384,6 @@ export default function NSAnalyzer() {
   return (
     <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#e2e8f0", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #151b2e; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -398,10 +404,12 @@ export default function NSAnalyzer() {
 
       {/* Tabs */}
       {trips.length > 0 && (
-        <div className="tab-scroll" style={{ display: "flex", gap: 2, padding: "12px 12px 0", background: "#0f1525", borderBottom: "1px solid #1e293b", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div role="tablist" aria-label="Sections" className="tab-scroll" style={{ display: "flex", gap: 2, padding: "12px 12px 0", background: "#0f1525", borderBottom: "1px solid #1e293b", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           {["overview", "routes", "compare", "trips", "upload"].map((t) => (
             <button
               key={t}
+              role="tab"
+              aria-selected={tab === t}
               onClick={() => setTab(t)}
               style={{
                 padding: "10px 14px",
@@ -437,11 +445,26 @@ export default function NSAnalyzer() {
               </p>
             </div>
 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.tsv,.txt"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+                // reset so selecting the same file again still triggers onChange
+                e.target.value = "";
+              }}
+              style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", border: 0 }}
+            />
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Upload CSV file: drop here or press Enter to browse"
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
-              onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".csv,.tsv,.txt"; inp.onchange = (e) => e.target.files[0] && handleFile(e.target.files[0]); inp.click(); }}
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInputRef.current?.click(); } }}
               style={{
                 border: `2px dashed ${dragOver ? "#fbbf24" : "#334155"}`,
                 borderRadius: 16,
@@ -453,7 +476,7 @@ export default function NSAnalyzer() {
                 marginBottom: 20,
               }}
             >
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📂</div>
+              <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">📂</div>
               <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Drop your CSV here or click to browse</div>
               <div style={{ fontSize: 13, color: "#64748b" }}>Supports NS export format (CSV, TSV)</div>
             </div>
@@ -484,8 +507,8 @@ export default function NSAnalyzer() {
                 fontFamily: "inherit",
                 transition: "border-color 0.2s",
               }}
-              onMouseEnter={(e) => (e.target.style.borderColor = "#fbbf24")}
-              onMouseLeave={(e) => (e.target.style.borderColor = "#334155")}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fbbf24")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#334155")}
             >
               🚂 Load demo data (Rotterdam commuter)
             </button>
