@@ -23,7 +23,7 @@ const SUBSCRIPTIONS = [
     weekendFree: false,
     offPeakFree: false,
     allFree: false,
-    color: "#38bdf8",
+    color: "#4497d1",
     description: "40% off-peak discount",
   },
   {
@@ -35,7 +35,7 @@ const SUBSCRIPTIONS = [
     weekendFree: false,
     offPeakFree: false,
     allFree: false,
-    color: "#818cf8",
+    color: "#6366f1",
     description: "20% peak + 40% off-peak discount",
   },
   {
@@ -47,7 +47,7 @@ const SUBSCRIPTIONS = [
     weekendFree: true,
     offPeakFree: false,
     allFree: false,
-    color: "#f472b6",
+    color: "#0f766e",
     description: "Unlimited weekend travel",
   },
   {
@@ -59,7 +59,7 @@ const SUBSCRIPTIONS = [
     weekendFree: false,
     offPeakFree: true,
     allFree: false,
-    color: "#34d399",
+    color: "#0a2463",
     description: "Unlimited off-peak travel",
   },
   {
@@ -71,7 +71,7 @@ const SUBSCRIPTIONS = [
     weekendFree: false,
     offPeakFree: false,
     allFree: true,
-    color: "#fbbf24",
+    color: "#ffc914",
     description: "Unlimited travel anytime",
   },
   {
@@ -84,7 +84,7 @@ const SUBSCRIPTIONS = [
     offPeakFree: false,
     allFree: false,
     trajectFree: true,
-    color: "#fb923c",
+    color: "#f59e0b",
     description: "Unlimited on your route, 40% off-peak elsewhere",
   },
 ];
@@ -247,6 +247,29 @@ function parseCSV(text) {
 
 const fmt = (n) => `€${n.toFixed(2)}`;
 
+// Design tokens (mirrors index.css :root vars for inline JS use)
+const T = {
+  primary: "#0a2463",
+  primaryHover: "#0e2e7e",
+  onPrimary: "#ffffff",
+  secondary: "#ffc914",
+  bg: "#f8fafc",
+  surface: "#ffffff",
+  surfaceSubtle: "#f1f5f9",
+  border: "#e2e8f0",
+  borderStrong: "#cbd5e1",
+  text: "#111827",
+  textMuted: "#475569",
+  textSubtle: "#94a3b8",
+  vizPeak: "#f59e0b",
+  vizOffpeak: "#4497d1",
+  vizWeekend: "#ffc914",
+  success: "#0f766e",
+  error: "#ba1a1a",
+  fontDisplay: "'Geist', system-ui, sans-serif",
+  fontBody: "'Inter', system-ui, sans-serif",
+};
+
 export default function NSAnalyzer() {
   const [trips, setTrips] = useState([]);
   const [tab, setTab] = useState("upload");
@@ -375,73 +398,102 @@ export default function NSAnalyzer() {
 
   const pieData = analysis
     ? [
-        { name: "Peak", value: analysis.peakSpend, fill: "#ef4444" },
-        { name: "Off-peak (weekday)", value: analysis.offPeakSpend, fill: "#38bdf8" },
-        { name: "Weekend", value: analysis.weekendSpend, fill: "#a78bfa" },
+        { name: "Peak", value: analysis.peakSpend, fill: T.vizPeak },
+        { name: "Off-peak (weekday)", value: analysis.offPeakSpend, fill: T.vizOffpeak },
+        { name: "Weekend", value: analysis.weekendSpend, fill: T.vizWeekend },
       ].filter((d) => d.value > 0)
     : [];
 
-  return (
-    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#e2e8f0", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
-      <style>{`
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #151b2e; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        .tab-scroll::-webkit-scrollbar { display: none; }
-        .tab-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+  const chartTooltip = {
+    background: T.surface,
+    border: `1px solid ${T.border}`,
+    borderRadius: 8,
+    fontSize: 13,
+    color: T.text,
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
+  };
 
+  const kpiSubColor = T.textSubtle;
+
+  return (
+    <div style={{ minHeight: "100vh", background: T.bg, color: T.text, fontFamily: T.fontBody }}>
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)", padding: "16px 12px", display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ width: 44, height: 44, background: "#1e293b", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "#fbbf24", fontFamily: "JetBrains Mono" }}>
-          NS
+      <header style={{ background: T.primary, borderBottom: `1px solid ${T.primary}` }}>
+        <div className="app-header-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", gap: 16 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              background: T.secondary,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              fontWeight: 700,
+              color: T.primary,
+              fontFamily: T.fontDisplay,
+              letterSpacing: "0.02em",
+            }}
+          >
+            NS
+          </div>
+          <div>
+            <div style={{ fontSize: 22, fontWeight: 600, color: "#ffffff", letterSpacing: "-0.01em", fontFamily: T.fontDisplay }}>
+              NS Trip Analyzer
+            </div>
+            <div style={{ fontSize: 13, color: "rgba(255, 255, 255, 0.75)", fontWeight: 400 }}>
+              Optimize your Dutch rail subscription
+            </div>
+          </div>
         </div>
-        <div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.5px" }}>NS Trip Analyzer</div>
-          <div style={{ fontSize: 13, color: "#44403c", fontWeight: 500 }}>Optimize your Dutch rail subscription</div>
-        </div>
-      </div>
+      </header>
 
       {/* Tabs */}
       {trips.length > 0 && (
-        <div role="tablist" aria-label="Sections" className="tab-scroll" style={{ display: "flex", gap: 2, padding: "12px 12px 0", background: "#0f1525", borderBottom: "1px solid #1e293b", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          {["overview", "routes", "compare", "trips", "upload"].map((t) => (
-            <button
-              key={t}
-              role="tab"
-              aria-selected={tab === t}
-              onClick={() => setTab(t)}
-              style={{
-                padding: "10px 14px",
-                background: tab === t ? "#1e293b" : "transparent",
-                color: tab === t ? "#fbbf24" : "#94a3b8",
-                border: "none",
-                borderRadius: "8px 8px 0 0",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: 13,
-                fontWeight: tab === t ? 700 : 500,
-                textTransform: "capitalize",
-                transition: "all 0.15s",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
-              {t === "compare" ? "Subscriptions" : t}
-            </button>
-          ))}
-        </div>
+        <nav style={{ background: T.surface, borderBottom: `1px solid ${T.border}` }}>
+          <div
+            role="tablist"
+            aria-label="Sections"
+            className="tab-scroll app-tabs-inner"
+            style={{
+              maxWidth: 1200,
+              margin: "0 auto",
+              padding: "0 24px",
+              display: "flex",
+              gap: 4,
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            {["overview", "routes", "compare", "trips", "upload"].map((t) => (
+              <button
+                key={t}
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => setTab(t)}
+                className="tab-btn"
+                style={{ textTransform: "capitalize" }}
+              >
+                {t === "compare" ? "Subscriptions" : t}
+              </button>
+            ))}
+          </div>
+        </nav>
       )}
 
-      <div style={{ padding: "16px 12px", maxWidth: 1100, margin: "0 auto" }}>
+      <main className="app-main" style={{ padding: "32px 24px", maxWidth: 1200, margin: "0 auto" }}>
         {/* Upload Tab */}
         {(tab === "upload" || trips.length === 0) && (
-          <div>
-            <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Import your NS trips</h2>
-              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6 }}>
+          <div style={{ maxWidth: 640, margin: "0 auto" }}>
+            <div style={{ marginBottom: 32 }}>
+              <h1 style={{ fontSize: 32, fontWeight: 600, marginBottom: 12, fontFamily: T.fontDisplay, letterSpacing: "-0.01em", color: T.text }}>
+                Import your NS trips
+              </h1>
+              <p style={{ color: T.textMuted, fontSize: 16, lineHeight: 1.6 }}>
                 Upload your NS trip history CSV from{" "}
-                <span style={{ color: "#fbbf24", fontWeight: 600 }}>ns.nl → Mijn NS → Reishistorie</span>. We'll analyze your travel patterns and find the cheapest subscription.
+                <span style={{ color: T.primary, fontWeight: 600 }}>ns.nl → Mijn NS → Reishistorie</span>.
+                We'll analyze your travel patterns and find the cheapest subscription.
               </p>
             </div>
 
@@ -451,7 +503,6 @@ export default function NSAnalyzer() {
               accept=".csv,.tsv,.txt"
               onChange={(e) => {
                 if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
-                // reset so selecting the same file again still triggers onChange
                 e.target.value = "";
               }}
               style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", border: 0 }}
@@ -466,55 +517,55 @@ export default function NSAnalyzer() {
               onClick={() => fileInputRef.current?.click()}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInputRef.current?.click(); } }}
               style={{
-                border: `2px dashed ${dragOver ? "#fbbf24" : "#334155"}`,
+                border: `2px dashed ${dragOver ? T.primary : T.borderStrong}`,
                 borderRadius: 16,
-                padding: "48px 32px",
+                padding: "56px 32px",
                 textAlign: "center",
                 cursor: "pointer",
-                background: dragOver ? "rgba(251, 191, 36, 0.05)" : "#111827",
+                background: dragOver ? "rgba(10, 36, 99, 0.04)" : T.surface,
                 transition: "all 0.2s",
-                marginBottom: 20,
+                marginBottom: 24,
               }}
             >
-              <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">📂</div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Drop your CSV here or click to browse</div>
-              <div style={{ fontSize: 13, color: "#64748b" }}>Supports NS export format (CSV, TSV)</div>
+              <div style={{ fontSize: 40, marginBottom: 16 }} aria-hidden="true">📂</div>
+              <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 6, fontFamily: T.fontDisplay, color: T.text }}>
+                Drop your CSV here or click to browse
+              </div>
+              <div style={{ fontSize: 13, color: T.textMuted }}>Supports NS export format (CSV, TSV)</div>
             </div>
 
             {parseError && (
-              <div style={{ padding: "12px 16px", background: "#7f1d1d33", border: "1px solid #dc262644", borderRadius: 10, color: "#fca5a5", fontSize: 13, marginBottom: 20 }}>
+              <div
+                style={{
+                  padding: "14px 18px",
+                  background: "#fef2f2",
+                  border: `1px solid #fecaca`,
+                  borderRadius: 8,
+                  color: T.error,
+                  fontSize: 14,
+                  marginBottom: 24,
+                }}
+              >
                 {parseError}
               </div>
             )}
 
-            <div style={{ textAlign: "center", margin: "20px 0" }}>
-              <span style={{ color: "#475569", fontSize: 13 }}>or</span>
+            <div style={{ textAlign: "center", margin: "20px 0", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ flex: 1, height: 1, background: T.border }} />
+              <span style={{ color: T.textSubtle, fontSize: 12, fontFamily: T.fontDisplay, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                or
+              </span>
+              <div style={{ flex: 1, height: 1, background: T.border }} />
             </div>
 
-            <button
-              onClick={loadDemo}
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "14px",
-                background: "linear-gradient(135deg, #1e293b, #0f172a)",
-                border: "1px solid #334155",
-                borderRadius: 12,
-                color: "#e2e8f0",
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "border-color 0.2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fbbf24")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#334155")}
-            >
+            <button onClick={loadDemo} className="btn-primary" style={{ width: "100%", padding: "14px" }}>
               🚂 Load demo data (Rotterdam commuter)
             </button>
 
-            <div style={{ marginTop: 32 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#94a3b8" }}>FAQ</h3>
+            <div style={{ marginTop: 40 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: T.textMuted, fontFamily: T.fontDisplay, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                FAQ
+              </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
                   {
@@ -530,14 +581,13 @@ export default function NSAnalyzer() {
                     a: "Nothing. This tool is free and always will be.",
                   },
                 ].map((faq, i) => (
-                  <div key={i} style={{ padding: "14px 18px", background: "#111827", borderRadius: 10, border: "1px solid #1e293b" }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{faq.q}</div>
-                    <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.6 }}>{faq.a}</div>
+                  <div key={i} className="surface" style={{ padding: "14px 18px" }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, fontFamily: T.fontDisplay, color: T.text }}>{faq.q}</div>
+                    <div style={{ fontSize: 14, color: T.textMuted, lineHeight: 1.6 }}>{faq.a}</div>
                   </div>
                 ))}
               </div>
             </div>
-
           </div>
         )}
 
@@ -546,30 +596,43 @@ export default function NSAnalyzer() {
           <div>
             {/* Recommendation Banner */}
             <div
+              className="hero-banner"
               style={{
-                background: "linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.03))",
-                border: "1px solid rgba(251,191,36,0.3)",
+                background: T.primary,
                 borderRadius: 16,
-                padding: "20px 24px",
+                padding: "24px 28px",
                 marginBottom: 24,
                 display: "flex",
                 alignItems: "center",
-                gap: 16,
+                gap: 20,
+                color: "#ffffff",
               }}
             >
-              <div style={{ fontSize: 32 }}>🏆</div>
+              <div className="hero-trophy" style={{ fontSize: 36 }} aria-hidden="true">🏆</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, color: "#fbbf24", fontWeight: 600, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: T.secondary,
+                    fontWeight: 600,
+                    marginBottom: 6,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    fontFamily: T.fontDisplay,
+                  }}
+                >
                   Best subscription for you
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 700 }}>{analysis.best.name}</div>
-                <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 2 }}>{analysis.best.description}</div>
+                <div className="hero-name" style={{ fontSize: 24, fontWeight: 600, fontFamily: T.fontDisplay, letterSpacing: "-0.01em" }}>
+                  {analysis.best.name}
+                </div>
+                <div style={{ fontSize: 14, color: "rgba(255, 255, 255, 0.75)", marginTop: 4 }}>{analysis.best.description}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: "#34d399", fontFamily: "JetBrains Mono" }}>
+                <div className="hero-savings" style={{ fontSize: 28, fontWeight: 700, color: T.secondary, fontFamily: T.fontDisplay, letterSpacing: "-0.01em" }}>
                   {analysis.best.savings > 0 ? `${fmt(analysis.best.savings)}` : "—"}
                 </div>
-                <div style={{ fontSize: 12, color: "#64748b" }}>
+                <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.6)" }}>
                   {analysis.best.savings > 0 ? `saved over ${months} mo.` : "already optimal"}
                 </div>
               </div>
@@ -581,12 +644,20 @@ export default function NSAnalyzer() {
               return (
                 <div
                   onClick={() => setTab("compare")}
-                  style={{ padding: "14px 18px", background: "#fb923c11", border: "1px solid #fb923c44", borderRadius: 12, marginBottom: 24, cursor: "pointer", transition: "border-color 0.2s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#fb923c")}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#fb923c44")}
+                  className="card-hover"
+                  style={{
+                    padding: "16px 20px",
+                    background: "#fff8e1",
+                    border: `1px solid #fde68a`,
+                    borderRadius: 8,
+                    marginBottom: 24,
+                    cursor: "pointer",
+                  }}
                 >
-                  <div style={{ fontSize: 13, color: "#fb923c", lineHeight: 1.6 }}>
-                    You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a <strong>Traject Vrij</strong> subscription might save you money. <span style={{ textDecoration: "underline" }}>Configure it in Subscriptions</span> to compare.
+                  <div style={{ fontSize: 14, color: "#854d0e", lineHeight: 1.6 }}>
+                    You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a{" "}
+                    <strong>Traject Vrij</strong> subscription might save you money.{" "}
+                    <span style={{ textDecoration: "underline" }}>Configure it in Subscriptions</span> to compare.
                   </div>
                 </div>
               );
@@ -600,43 +671,61 @@ export default function NSAnalyzer() {
                 { label: "Peak trips", value: analysis.peakTrips, sub: fmt(analysis.peakSpend) },
                 { label: "Off-peak / Weekend", value: `${analysis.offPeakTrips} / ${analysis.weekendTrips}`, sub: fmt(analysis.offPeakSpend + analysis.weekendSpend) },
               ].map((kpi, i) => (
-                <div key={i} style={{ background: "#111827", borderRadius: 12, padding: "16px 18px", border: "1px solid #1e293b" }}>
-                  <div style={{ fontSize: 12, color: "#64748b", fontWeight: 500, marginBottom: 6 }}>{kpi.label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 700, fontFamily: "JetBrains Mono", letterSpacing: "-0.5px" }}>{kpi.value}</div>
-                  <div style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>{kpi.sub}</div>
+                <div key={i} className="surface">
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: T.textMuted,
+                      fontWeight: 500,
+                      marginBottom: 10,
+                      fontFamily: T.fontDisplay,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    {kpi.label}
+                  </div>
+                  <div className="kpi-value" style={{ fontSize: 28, fontWeight: 700, fontFamily: T.fontDisplay, color: T.text }}>
+                    {kpi.value}
+                  </div>
+                  <div style={{ fontSize: 13, color: kpiSubColor, marginTop: 4 }}>{kpi.sub}</div>
                 </div>
               ))}
             </div>
 
             {/* Charts row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 24 }}>
-              <div style={{ background: "#111827", borderRadius: 12, padding: "18px 20px", border: "1px solid #1e293b" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Trips by day of week</div>
-                <ResponsiveContainer width="100%" height={200}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, marginBottom: 24 }}>
+              <div className="surface">
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, fontFamily: T.fontDisplay, color: T.text }}>
+                  Trips by day of week
+                </div>
+                <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={analysis.dayData}>
-                    <XAxis dataKey="name" tick={{ fill: "#64748b", fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
-                    <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" }} />
+                    <XAxis dataKey="name" tick={{ fill: T.textMuted, fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: T.textMuted, fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
+                    <Tooltip contentStyle={chartTooltip} cursor={{ fill: "rgba(10, 36, 99, 0.04)" }} />
                     <Bar dataKey="trips" radius={[4, 4, 0, 0]}>
                       {analysis.dayData.map((_, i) => (
-                        <Cell key={i} fill={i === 0 || i === 6 ? "#a78bfa" : "#fbbf24"} />
+                        <Cell key={i} fill={i === 0 || i === 6 ? T.vizWeekend : T.primary} />
                       ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              <div style={{ background: "#111827", borderRadius: 12, padding: "18px 20px", border: "1px solid #1e293b" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Spend distribution</div>
-                <ResponsiveContainer width="100%" height={200}>
+              <div className="surface">
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, fontFamily: T.fontDisplay, color: T.text }}>
+                  Spend distribution
+                </div>
+                <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} strokeWidth={0}>
+                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} strokeWidth={0}>
                       {pieData.map((d, i) => (
                         <Cell key={i} fill={d.fill} />
                       ))}
                     </Pie>
-                    <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
-                    <Tooltip formatter={(v) => fmt(v)} contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" }} />
+                    <Legend wrapperStyle={{ fontSize: 12, color: T.textMuted }} />
+                    <Tooltip formatter={(v) => fmt(v)} contentStyle={chartTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -647,21 +736,33 @@ export default function NSAnalyzer() {
         {/* Routes Tab */}
         {tab === "routes" && analysis && (
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Top Routes</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 20, fontFamily: T.fontDisplay, letterSpacing: "-0.01em", color: T.text }}>
+              Top Routes
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {analysis.topRoutes.map((r, i) => {
                 const pct = (r.spend / analysis.totalSpent) * 100;
                 return (
-                  <div key={i} style={{ background: "#111827", borderRadius: 12, padding: "16px 20px", border: "1px solid #1e293b" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div key={i} className="surface">
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
                       <div>
-                        <span style={{ fontSize: 15, fontWeight: 600 }}>{r.route}</span>
-                        <span style={{ fontSize: 12, color: "#64748b", marginLeft: 10 }}>{r.count} trips</span>
+                        <span style={{ fontSize: 15, fontWeight: 600, fontFamily: T.fontDisplay, color: T.text }}>{r.route}</span>
+                        <span style={{ fontSize: 13, color: T.textMuted, marginLeft: 12 }}>{r.count} trips</span>
                       </div>
-                      <div style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: "#fbbf24" }}>{fmt(r.spend)}</div>
+                      <div style={{ fontFamily: T.fontDisplay, fontSize: 16, fontWeight: 600, color: T.primary, letterSpacing: "-0.01em" }}>
+                        {fmt(r.spend)}
+                      </div>
                     </div>
-                    <div style={{ height: 6, background: "#1e293b", borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #fbbf24, #f59e0b)", borderRadius: 3, transition: "width 0.5s" }} />
+                    <div style={{ height: 8, background: T.surfaceSubtle, borderRadius: 4, overflow: "hidden" }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${pct}%`,
+                          background: T.primary,
+                          borderRadius: 4,
+                          transition: "width 0.5s",
+                        }}
+                      />
                     </div>
                   </div>
                 );
@@ -673,12 +774,25 @@ export default function NSAnalyzer() {
         {/* Subscription Comparison Tab */}
         {tab === "compare" && analysis && (
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Subscription Comparison</h2>
-            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 8, fontFamily: T.fontDisplay, letterSpacing: "-0.01em", color: T.text }}>
+              Subscription Comparison
+            </h2>
+            <p style={{ fontSize: 14, color: T.textMuted, marginBottom: 20 }}>
               Total cost over your {months}-month travel period.
             </p>
 
-            <div style={{ padding: "14px 18px", background: "#1e1a0e", border: "1px solid #854d0e44", borderRadius: 10, marginBottom: 20, fontSize: 13, color: "#d97706", lineHeight: 1.6 }}>
+            <div
+              style={{
+                padding: "14px 18px",
+                background: "#fff8e1",
+                border: `1px solid #fde68a`,
+                borderRadius: 8,
+                marginBottom: 24,
+                fontSize: 13,
+                color: "#854d0e",
+                lineHeight: 1.6,
+              }}
+            >
               Note: the prices in your CSV reflect what you actually paid with your current subscription. This tool does not account for that — it compares subscriptions as if all trips were at full price. Trips that were discounted by your current subscription will appear cheaper than they would be without one.
             </div>
 
@@ -686,23 +800,54 @@ export default function NSAnalyzer() {
             {(() => {
               const frequentRoute = routeOptions.find((r) => r.count > 10);
               return (
-                <div style={{ padding: "16px 20px", background: "#111827", border: `1px solid ${frequentRoute && !trajectPrice ? "#fb923c44" : "#1e293b"}`, borderRadius: 12, marginBottom: 20 }}>
+                <div
+                  className="surface"
+                  style={{
+                    border: `1px solid ${frequentRoute && !trajectPrice ? T.warning : T.border}`,
+                    marginBottom: 24,
+                  }}
+                >
                   {frequentRoute && !trajectPrice && (
-                    <div style={{ padding: "10px 14px", background: "#fb923c11", borderRadius: 8, marginBottom: 12, fontSize: 13, color: "#fb923c", lineHeight: 1.6 }}>
+                    <div
+                      style={{
+                        padding: "12px 16px",
+                        background: "#fff8e1",
+                        borderRadius: 8,
+                        marginBottom: 16,
+                        fontSize: 13,
+                        color: "#854d0e",
+                        lineHeight: 1.6,
+                      }}
+                    >
                       You traveled <strong>{frequentRoute.label}</strong> {frequentRoute.count} times — a Traject Vrij subscription might save you money. Enter the monthly price from ns.nl to compare.
                     </div>
                   )}
-                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: "#fb923c" }}>Traject Vrij</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, fontFamily: T.fontDisplay, color: T.text }}>
+                    Traject Vrij
+                  </div>
                   <div style={{ display: "flex", gap: 16, alignItems: "end", flexWrap: "wrap" }}>
-                    <div style={{ flex: 1, minWidth: 200 }}>
-                      <label style={{ fontSize: 12, color: "#94a3b8", display: "block", marginBottom: 4 }}>Route</label>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                      <label
+                        style={{
+                          fontSize: 12,
+                          color: T.textMuted,
+                          display: "block",
+                          marginBottom: 6,
+                          fontFamily: T.fontDisplay,
+                          fontWeight: 500,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Route
+                      </label>
                       <select
                         value={trajectRoute ? `${trajectRoute.from}|${trajectRoute.to}` : ""}
                         onChange={(e) => {
                           const opt = routeOptions.find((r) => `${r.from}|${r.to}` === e.target.value);
                           setTrajectRoute(opt || null);
                         }}
-                        style={{ width: "100%", padding: "8px 10px", background: "#0a0e1a", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                        className="field"
                       >
                         {routeOptions.map((r) => (
                           <option key={`${r.from}|${r.to}`} value={`${r.from}|${r.to}`}>
@@ -711,8 +856,21 @@ export default function NSAnalyzer() {
                         ))}
                       </select>
                     </div>
-                    <div style={{ minWidth: 160 }}>
-                      <label style={{ fontSize: 12, color: "#94a3b8", display: "block", marginBottom: 4 }}>Monthly price (from ns.nl)</label>
+                    <div style={{ minWidth: 180 }}>
+                      <label
+                        style={{
+                          fontSize: 12,
+                          color: T.textMuted,
+                          display: "block",
+                          marginBottom: 6,
+                          fontFamily: T.fontDisplay,
+                          fontWeight: 500,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Monthly price (ns.nl)
+                      </label>
                       <input
                         type="number"
                         step="0.01"
@@ -720,12 +878,12 @@ export default function NSAnalyzer() {
                         placeholder="e.g. 95.00"
                         value={trajectPrice}
                         onChange={(e) => setTrajectPrice(e.target.value)}
-                        style={{ width: "100%", padding: "8px 10px", background: "#0a0e1a", border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13, fontFamily: "JetBrains Mono" }}
+                        className="field field--mono"
                       />
                     </div>
                   </div>
                   {!trajectPrice && (
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>
+                    <div style={{ fontSize: 12, color: T.textSubtle, marginTop: 10 }}>
                       Enter the monthly price to include Traject Vrij in the comparison.
                     </div>
                   )}
@@ -733,59 +891,88 @@ export default function NSAnalyzer() {
               );
             })()}
 
-            <div style={{ marginBottom: 28 }}>
-              <ResponsiveContainer width="100%" height={Math.max(200, analysis.subCosts.length * 40)}>
-                <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 120 }}>
-                  <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `€${v}`} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={120} />
-                  <Tooltip
-                    contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, fontSize: 13, color: "#e2e8f0" }}
-                    formatter={(v) => fmt(v)}
+            <div className="surface" style={{ marginBottom: 24 }}>
+              <ResponsiveContainer width="100%" height={Math.max(220, analysis.subCosts.length * 44)}>
+                <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
+                  <XAxis type="number" tick={{ fill: T.textMuted, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `€${v}`} />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fill: T.text, fontSize: 12, fontWeight: 500, fontFamily: "Geist" }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={104}
                   />
-                  <Bar dataKey="total" radius={[0, 6, 6, 0]} barSize={24}>
+                  <Tooltip contentStyle={chartTooltip} formatter={(v) => fmt(v)} cursor={{ fill: "rgba(10, 36, 99, 0.04)" }} />
+                  <Bar dataKey="total" radius={[0, 6, 6, 0]} barSize={26}>
                     {analysis.subCosts.map((s, i) => (
-                      <Cell key={i} fill={s.id === analysis.best.id ? "#fbbf24" : s.color} opacity={s.id === analysis.best.id ? 1 : 0.6} />
+                      <Cell key={i} fill={s.id === analysis.best.id ? T.secondary : s.color} opacity={s.id === analysis.best.id ? 1 : 0.7} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
               {analysis.subCosts.map((s) => {
                 const isBest = s.id === analysis.best.id;
                 return (
                   <div
                     key={s.id}
+                    className="surface"
                     style={{
-                      background: isBest ? "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02))" : "#111827",
-                      borderRadius: 14,
-                      padding: "18px 20px",
-                      border: `1px solid ${isBest ? "rgba(251,191,36,0.4)" : "#1e293b"}`,
+                      border: `1px solid ${isBest ? T.secondary : T.border}`,
+                      borderTopWidth: isBest ? 3 : 1,
+                      borderTopColor: isBest ? T.secondary : T.border,
                       position: "relative",
                     }}
                   >
                     {isBest && (
-                      <div style={{ position: "absolute", top: -10, right: 14, background: "#fbbf24", color: "#0f172a", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: -12,
+                          right: 16,
+                          background: T.secondary,
+                          color: T.primary,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: "4px 12px",
+                          borderRadius: 9999,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          fontFamily: T.fontDisplay,
+                        }}
+                      >
                         Best fit
                       </div>
                     )}
-                    <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{s.name}</div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginBottom: 14 }}>{s.description}</div>
+                    <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 4, fontFamily: T.fontDisplay, color: T.text }}>{s.name}</div>
+                    <div style={{ fontSize: 13, color: T.textMuted, marginBottom: 18, lineHeight: 1.5 }}>{s.description}</div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: "#94a3b8" }}>Subscription</span>
-                      <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", fontWeight: 500 }}>{fmt(s.subscriptionCost)}</span>
+                      <span style={{ fontSize: 13, color: T.textMuted }}>Subscription</span>
+                      <span style={{ fontSize: 13, fontFamily: T.fontDisplay, fontWeight: 500, color: T.text }}>{fmt(s.subscriptionCost)}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: "#94a3b8" }}>Trip costs</span>
-                      <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", fontWeight: 500 }}>{fmt(s.tripCost)}</span>
+                      <span style={{ fontSize: 13, color: T.textMuted }}>Trip costs</span>
+                      <span style={{ fontSize: 13, fontFamily: T.fontDisplay, fontWeight: 500, color: T.text }}>{fmt(s.tripCost)}</span>
                     </div>
-                    <div style={{ borderTop: "1px solid #1e293b", paddingTop: 8, marginTop: 8, display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>Total</span>
-                      <span style={{ fontSize: 16, fontFamily: "JetBrains Mono", fontWeight: 700, color: isBest ? "#fbbf24" : "#e2e8f0" }}>{fmt(s.total)}</span>
+                    <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, fontFamily: T.fontDisplay, color: T.text }}>Total</span>
+                      <span
+                        style={{
+                          fontSize: 20,
+                          fontFamily: T.fontDisplay,
+                          fontWeight: 700,
+                          color: isBest ? T.primary : T.text,
+                          letterSpacing: "-0.01em",
+                        }}
+                      >
+                        {fmt(s.total)}
+                      </span>
                     </div>
                     {s.savings > 0 && (
-                      <div style={{ marginTop: 8, fontSize: 12, color: "#34d399", fontWeight: 600, textAlign: "right" }}>
+                      <div style={{ marginTop: 10, fontSize: 12, color: T.success, fontWeight: 600, textAlign: "right", fontFamily: T.fontDisplay }}>
                         Save {fmt(s.savings)} vs no subscription
                       </div>
                     )}
@@ -799,16 +986,32 @@ export default function NSAnalyzer() {
         {/* Trips Tab */}
         {tab === "trips" && classified.length > 0 && (
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>
-              All Trips <span style={{ fontSize: 13, fontWeight: 400, color: "#64748b" }}>({classified.length})</span>
+            <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 20, fontFamily: T.fontDisplay, letterSpacing: "-0.01em", color: T.text }}>
+              All Trips{" "}
+              <span style={{ fontSize: 14, fontWeight: 400, color: T.textMuted, fontFamily: T.fontBody }}>
+                ({classified.length})
+              </span>
             </h2>
-            <div style={{ background: "#111827", borderRadius: 12, border: "1px solid #1e293b", overflow: "hidden" }}>
-              <div style={{ maxHeight: 500, overflowY: "auto", overflowX: "auto" }}>
-                <table style={{ width: "100%", minWidth: 550, borderCollapse: "collapse", fontSize: 13 }}>
+            <div className="surface" style={{ padding: 0, overflow: "hidden" }}>
+              <div style={{ maxHeight: 560, overflowY: "auto", overflowX: "auto" }}>
+                <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", fontSize: 14 }}>
                   <thead>
-                    <tr style={{ background: "#0f172a", position: "sticky", top: 0 }}>
+                    <tr style={{ background: T.surfaceSubtle, position: "sticky", top: 0 }}>
                       {["Date", "From", "To", "Time", "Type", "Price"].map((h) => (
-                        <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "#94a3b8", fontSize: 12, borderBottom: "1px solid #1e293b" }}>
+                        <th
+                          key={h}
+                          style={{
+                            padding: "12px 16px",
+                            textAlign: "left",
+                            fontWeight: 600,
+                            color: T.textMuted,
+                            fontSize: 11,
+                            fontFamily: T.fontDisplay,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            borderBottom: `1px solid ${T.border}`,
+                          }}
+                        >
                           {h}
                         </th>
                       ))}
@@ -816,26 +1019,29 @@ export default function NSAnalyzer() {
                   </thead>
                   <tbody>
                     {classified.map((t, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #1e293b11" }}>
-                        <td style={{ padding: "8px 14px", fontFamily: "JetBrains Mono", fontSize: 12 }}>{t.date}</td>
-                        <td style={{ padding: "8px 14px" }}>{t.from}</td>
-                        <td style={{ padding: "8px 14px" }}>{t.to}</td>
-                        <td style={{ padding: "8px 14px", fontFamily: "JetBrains Mono", fontSize: 12, color: "#94a3b8" }}>{t.checkin}</td>
-                        <td style={{ padding: "8px 14px" }}>
+                      <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
+                        <td style={{ padding: "10px 16px", fontFamily: T.fontDisplay, fontSize: 13, color: T.text }}>{t.date}</td>
+                        <td style={{ padding: "10px 16px", color: T.text }}>{t.from}</td>
+                        <td style={{ padding: "10px 16px", color: T.text }}>{t.to}</td>
+                        <td style={{ padding: "10px 16px", fontFamily: T.fontDisplay, fontSize: 13, color: T.textMuted }}>{t.checkin}</td>
+                        <td style={{ padding: "10px 16px" }}>
                           <span
                             style={{
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: 600,
-                              padding: "2px 8px",
-                              borderRadius: 20,
-                              background: t.isPeak ? "#dc262622" : t.isWeekend ? "#8b5cf622" : "#0ea5e922",
-                              color: t.isPeak ? "#fca5a5" : t.isWeekend ? "#c4b5fd" : "#67e8f9",
+                              padding: "3px 10px",
+                              borderRadius: 9999,
+                              background: t.isPeak ? "rgba(245, 158, 11, 0.12)" : t.isWeekend ? "rgba(255, 201, 20, 0.18)" : "rgba(68, 151, 209, 0.12)",
+                              color: t.isPeak ? "#92400e" : t.isWeekend ? "#854d0e" : "#075985",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.06em",
+                              fontFamily: T.fontDisplay,
                             }}
                           >
                             {t.isPeak ? "Peak" : t.isWeekend ? "Weekend" : "Off-peak"}
                           </span>
                         </td>
-                        <td style={{ padding: "8px 14px", fontFamily: "JetBrains Mono", fontWeight: 600 }}>{fmt(t.price)}</td>
+                        <td style={{ padding: "10px 16px", fontFamily: T.fontDisplay, fontWeight: 600, color: T.text }}>{fmt(t.price)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -844,7 +1050,7 @@ export default function NSAnalyzer() {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
