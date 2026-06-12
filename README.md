@@ -1,16 +1,19 @@
-# React + Vite
+# NS Trip Analyzer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small PWA that analyzes your Dutch Railways (NS) trip history and recommends the cheapest NS subscription for your travel pattern. Upload the CSV you can export from `ns.nl → Mijn NS → Reishistorie` (everything is processed locally in the browser — no data leaves your device) and it breaks down your spend by peak / off-peak / weekend, surfaces your top routes, and compares all standard NS subscriptions (including a configurable Traject Vrij) over your actual travel window.
 
-Currently, two official plugins are available:
+Built with React + Vite + Recharts and shipped as a PWA. Deployed to GitHub Pages via the workflow in `.github/workflows/deploy.yml`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Development
 
-## React Compiler
+```bash
+npm install
+npm run dev      # start the Vite dev server
+npm run lint     # run ESLint
+npm run build    # production build into dist/
+npm run preview  # serve the production build locally
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Deployment
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Pushes to `main` trigger the GitHub Actions workflow, which builds the app and publishes `dist/` to GitHub Pages. The `base` path in `vite.config.js` is `/ns-trip-analyzer/` — adjust it if you fork to a different repo name.
