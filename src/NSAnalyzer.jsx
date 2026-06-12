@@ -893,15 +893,15 @@ export default function NSAnalyzer() {
 
             <div className="surface" style={{ marginBottom: 24 }}>
               <ResponsiveContainer width="100%" height={Math.max(220, analysis.subCosts.length * 44)}>
-                <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 120, right: 20 }}>
+                <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
                   <XAxis type="number" tick={{ fill: T.textMuted, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `€${v}`} />
                   <YAxis
                     type="category"
                     dataKey="name"
-                    tick={{ fill: T.text, fontSize: 13, fontWeight: 500, fontFamily: "Geist" }}
+                    tick={{ fill: T.text, fontSize: 12, fontWeight: 500, fontFamily: "Geist" }}
                     axisLine={false}
                     tickLine={false}
-                    width={120}
+                    width={104}
                   />
                   <Tooltip contentStyle={chartTooltip} formatter={(v) => fmt(v)} cursor={{ fill: "rgba(10, 36, 99, 0.04)" }} />
                   <Bar dataKey="total" radius={[0, 6, 6, 0]} barSize={26}>
