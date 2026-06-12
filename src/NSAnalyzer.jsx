@@ -270,13 +270,6 @@ const T = {
   fontBody: "'Inter', system-ui, sans-serif",
 };
 
-const card = {
-  background: T.surface,
-  borderRadius: 8,
-  border: `1px solid ${T.border}`,
-  padding: "24px",
-};
-
 export default function NSAnalyzer() {
   const [trips, setTrips] = useState([]);
   const [tab, setTab] = useState("upload");
@@ -426,7 +419,7 @@ export default function NSAnalyzer() {
     <div style={{ minHeight: "100vh", background: T.bg, color: T.text, fontFamily: T.fontBody }}>
       {/* Header */}
       <header style={{ background: T.primary, borderBottom: `1px solid ${T.primary}` }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", gap: 16 }}>
+        <div className="app-header-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", gap: 16 }}>
           <div
             style={{
               width: 44,
@@ -462,7 +455,7 @@ export default function NSAnalyzer() {
           <div
             role="tablist"
             aria-label="Sections"
-            className="tab-scroll"
+            className="tab-scroll app-tabs-inner"
             style={{
               maxWidth: 1200,
               margin: "0 auto",
@@ -489,7 +482,7 @@ export default function NSAnalyzer() {
         </nav>
       )}
 
-      <main style={{ padding: "32px 24px", maxWidth: 1200, margin: "0 auto" }}>
+      <main className="app-main" style={{ padding: "32px 24px", maxWidth: 1200, margin: "0 auto" }}>
         {/* Upload Tab */}
         {(tab === "upload" || trips.length === 0) && (
           <div style={{ maxWidth: 640, margin: "0 auto" }}>
@@ -588,7 +581,7 @@ export default function NSAnalyzer() {
                     a: "Nothing. This tool is free and always will be.",
                   },
                 ].map((faq, i) => (
-                  <div key={i} className="card-hover" style={{ ...card, padding: "16px 20px" }}>
+                  <div key={i} className="surface" style={{ padding: "14px 18px" }}>
                     <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, fontFamily: T.fontDisplay, color: T.text }}>{faq.q}</div>
                     <div style={{ fontSize: 14, color: T.textMuted, lineHeight: 1.6 }}>{faq.a}</div>
                   </div>
@@ -603,6 +596,7 @@ export default function NSAnalyzer() {
           <div>
             {/* Recommendation Banner */}
             <div
+              className="hero-banner"
               style={{
                 background: T.primary,
                 borderRadius: 16,
@@ -614,7 +608,7 @@ export default function NSAnalyzer() {
                 color: "#ffffff",
               }}
             >
-              <div style={{ fontSize: 36 }} aria-hidden="true">🏆</div>
+              <div className="hero-trophy" style={{ fontSize: 36 }} aria-hidden="true">🏆</div>
               <div style={{ flex: 1 }}>
                 <div
                   style={{
@@ -629,13 +623,13 @@ export default function NSAnalyzer() {
                 >
                   Best subscription for you
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 600, fontFamily: T.fontDisplay, letterSpacing: "-0.01em" }}>
+                <div className="hero-name" style={{ fontSize: 24, fontWeight: 600, fontFamily: T.fontDisplay, letterSpacing: "-0.01em" }}>
                   {analysis.best.name}
                 </div>
                 <div style={{ fontSize: 14, color: "rgba(255, 255, 255, 0.75)", marginTop: 4 }}>{analysis.best.description}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 28, fontWeight: 700, color: T.secondary, fontFamily: T.fontDisplay, letterSpacing: "-0.01em" }}>
+                <div className="hero-savings" style={{ fontSize: 28, fontWeight: 700, color: T.secondary, fontFamily: T.fontDisplay, letterSpacing: "-0.01em" }}>
                   {analysis.best.savings > 0 ? `${fmt(analysis.best.savings)}` : "—"}
                 </div>
                 <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.6)" }}>
@@ -670,14 +664,14 @@ export default function NSAnalyzer() {
             })()}
 
             {/* KPI cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
               {[
                 { label: "Total trips", value: analysis.totalTrips, sub: `over ${months} month${months > 1 ? "s" : ""}` },
                 { label: "Total spent", value: fmt(analysis.totalSpent), sub: `${fmt(analysis.avgPerMonth)}/month` },
                 { label: "Peak trips", value: analysis.peakTrips, sub: fmt(analysis.peakSpend) },
                 { label: "Off-peak / Weekend", value: `${analysis.offPeakTrips} / ${analysis.weekendTrips}`, sub: fmt(analysis.offPeakSpend + analysis.weekendSpend) },
               ].map((kpi, i) => (
-                <div key={i} className="card-hover" style={card}>
+                <div key={i} className="surface">
                   <div
                     style={{
                       fontSize: 12,
@@ -691,7 +685,7 @@ export default function NSAnalyzer() {
                   >
                     {kpi.label}
                   </div>
-                  <div style={{ fontSize: 28, fontWeight: 700, fontFamily: T.fontDisplay, color: T.text }}>
+                  <div className="kpi-value" style={{ fontSize: 28, fontWeight: 700, fontFamily: T.fontDisplay, color: T.text }}>
                     {kpi.value}
                   </div>
                   <div style={{ fontSize: 13, color: kpiSubColor, marginTop: 4 }}>{kpi.sub}</div>
@@ -701,7 +695,7 @@ export default function NSAnalyzer() {
 
             {/* Charts row */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, marginBottom: 24 }}>
-              <div className="card-hover" style={card}>
+              <div className="surface">
                 <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, fontFamily: T.fontDisplay, color: T.text }}>
                   Trips by day of week
                 </div>
@@ -719,7 +713,7 @@ export default function NSAnalyzer() {
                 </ResponsiveContainer>
               </div>
 
-              <div className="card-hover" style={card}>
+              <div className="surface">
                 <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, fontFamily: T.fontDisplay, color: T.text }}>
                   Spend distribution
                 </div>
@@ -749,7 +743,7 @@ export default function NSAnalyzer() {
               {analysis.topRoutes.map((r, i) => {
                 const pct = (r.spend / analysis.totalSpent) * 100;
                 return (
-                  <div key={i} className="card-hover" style={card}>
+                  <div key={i} className="surface">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
                       <div>
                         <span style={{ fontSize: 15, fontWeight: 600, fontFamily: T.fontDisplay, color: T.text }}>{r.route}</span>
@@ -807,8 +801,8 @@ export default function NSAnalyzer() {
               const frequentRoute = routeOptions.find((r) => r.count > 10);
               return (
                 <div
+                  className="surface"
                   style={{
-                    ...card,
                     border: `1px solid ${frequentRoute && !trajectPrice ? T.warning : T.border}`,
                     marginBottom: 24,
                   }}
@@ -897,7 +891,7 @@ export default function NSAnalyzer() {
               );
             })()}
 
-            <div style={{ ...card, marginBottom: 24 }}>
+            <div className="surface" style={{ marginBottom: 24 }}>
               <ResponsiveContainer width="100%" height={Math.max(220, analysis.subCosts.length * 44)}>
                 <BarChart data={analysis.subCosts} layout="vertical" margin={{ left: 120, right: 20 }}>
                   <XAxis type="number" tick={{ fill: T.textMuted, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `€${v}`} />
@@ -925,9 +919,8 @@ export default function NSAnalyzer() {
                 return (
                   <div
                     key={s.id}
-                    className="card-hover"
+                    className="surface"
                     style={{
-                      ...card,
                       border: `1px solid ${isBest ? T.secondary : T.border}`,
                       borderTopWidth: isBest ? 3 : 1,
                       borderTopColor: isBest ? T.secondary : T.border,
@@ -999,7 +992,7 @@ export default function NSAnalyzer() {
                 ({classified.length})
               </span>
             </h2>
-            <div style={{ ...card, padding: 0, overflow: "hidden" }}>
+            <div className="surface" style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ maxHeight: 560, overflowY: "auto", overflowX: "auto" }}>
                 <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", fontSize: 14 }}>
                   <thead>

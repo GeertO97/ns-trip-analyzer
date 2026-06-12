@@ -85,12 +85,52 @@ body {
   scrollbar-width: none;
 }
 
-/* Card hover ambient shadow */
-.card-hover {
+/* Surface card — used for KPIs, charts, routes, FAQ, subscriptions */
+.surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
-.card-hover:hover {
+.surface:hover {
   box-shadow: var(--shadow-card-hover);
+}
+
+/* Responsive: tighten everything on mobile */
+@media (max-width: 640px) {
+  .surface {
+    padding: 14px 16px;
+  }
+  .app-main {
+    padding: 16px !important;
+  }
+  .app-header-inner {
+    padding: 14px 16px !important;
+  }
+  .app-tabs-inner {
+    padding: 0 16px !important;
+  }
+  .hero-banner {
+    padding: 16px !important;
+    gap: 12px !important;
+    border-radius: 12px !important;
+  }
+  .hero-name {
+    font-size: 20px !important;
+  }
+  .hero-savings {
+    font-size: 22px !important;
+  }
+  .hero-trophy {
+    font-size: 28px !important;
+  }
+  .kpi-value {
+    font-size: 22px !important;
+  }
+  .page-title {
+    font-size: 22px !important;
+  }
 }
 
 /* Tab button */
